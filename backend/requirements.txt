@@ -1,0 +1,10 @@
+fastapi>=0.115.14
+findmy>=0.8.0
+isort>=6.0.1
+pyargon2>=1.1.2
+PyJWT>=2.10.1
+requests>=2.32.4
+sqlmodel>=0.0.24
+uvicorn>=0.34.3
+python-multipart>=0.0.20
+gunicorn>=23.0.0

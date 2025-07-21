@@ -1,0 +1,31 @@
+
+[jwt]
+secret = "REPLACE WITH A SECURE KEY"
+expire = 30                          # in minutes
+
+secret_refresh = "REPLACE WITH A SECURE KEY"
+expire_refresh = 48                          # in hours
+
+algorithm = "HS256"
+
+[admin]
+name = "REPLACE WITH ADMIN USERNAME"
+password = "REPLACE WITH A SECURE KEY"
+
+[findmy]
+anisette = "http://localhost:6969"
+account = "REPLACE WITH ACCOUNT.JSON PATH"
+
+[db]
+uri = "sqlite://REPLACE WITH DB PATH"
+
+[frontend]
+path = "REPLACE WITH DIST FOLDER PATH FROM FRONTEND"
+
+
+# If cors is needed
+# [cors]
+# allow_credentials = true
+# cors_origins = ["*"]
+# cors_headers = ["*"]
+# cors_methods = ["*"]
