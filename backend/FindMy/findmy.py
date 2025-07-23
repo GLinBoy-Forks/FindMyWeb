@@ -46,16 +46,16 @@ class FindMy:
             f"{accessory_key}-{lat}-{lon}-{timestamp.timestamp()}".encode("ascii")
         ).hexdigest()
 
-    async def _update_timer(self):
+    async def _update_timer(self, hours=2):
         while True:
             await asyncio.sleep(self.UPDATE_INTERVAL)
-            await self._refetch_reports()
+            await self._refetch_reports(hours=hours)
 
-    async def _refetch_reports(self):
+    async def _refetch_reports(self, hours: int = 7 * 24):
         for user in await self.db.get_users():
             accessories = await self.db.get_accessories_by_user(user=user)
             for accessory in accessories:
-                locations = await self._fetch_locations(accessory)
+                locations = await self._fetch_locations(accessory, hours=hours)
                 for location in locations:
                     await self.db.add_location(location)
 
