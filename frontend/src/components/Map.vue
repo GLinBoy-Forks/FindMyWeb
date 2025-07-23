@@ -92,7 +92,7 @@ async function appleMaps(name: string, location: Location) {
   if(!location.lat || !location.lon) {
     return "https://en.wikipedia.org/wiki/HTTP_404";
   }
-  return `https:\\maps.apple.com/?ll=${location.lat},${location.lon}&q=${await urlsafeString(name)}`;
+  return `https://maps.apple.com/?ll=${location.lat},${location.lon}&q=${await urlsafeString(name)}`;
 }
 
 async function getHtmlForLocation(header: string, name: string, location: Location) {
