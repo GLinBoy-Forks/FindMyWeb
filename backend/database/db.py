@@ -4,12 +4,8 @@ from pyargon2 import hash
 from sqlmodel import Session, SQLModel, create_engine, desc, or_, select
 
 from const import CONFIG
-from database.exceptions import (
-    AccessoryDoesntExist,
-    AccessoryExists,
-    UserDoesNotExist,
-    UserExists,
-)
+from database.exceptions import (AccessoryDoesntExist, AccessoryExists,
+                                 UserDoesNotExist, UserExists)
 from database.models import Accessory, Location, User
 
 

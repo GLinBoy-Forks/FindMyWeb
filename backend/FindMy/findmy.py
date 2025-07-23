@@ -16,10 +16,6 @@ from database.models import Accessory, Location, User
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
 
 
-class WrongColorFormat(Exception):
-    """Raised when the color for an `Accessory` doesn't use the HTML color format"""
-
-
 class FindMy:
     UPDATE_INTERVAL_MIN = 40
     UPDATE_INTERVAL_MAX = 80

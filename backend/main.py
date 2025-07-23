@@ -19,17 +19,34 @@ from const import CONFIG
 from database import Database
 from database.exceptions import AccessoryExists, UserExists
 from database.models import Accessory, User
-from FindMy import FindMy, WrongColorFormat
-from helpers import (CREDENTIALS_EXCEPTION, CookieType, TokenType,
-                     create_access_token, create_refresh_token)
-from http_models import (AccessoriesResponse, AccessoryRequest,
-                         AccessoryResponse, AdvertisementRequest,
-                         AdvertisementResponse, ChangePasswordRequest,
-                         CreateAccessoryRequest, CreateUserRequest,
-                         LocationsRequest, LocationsResponse, LoginResponse,
-                         PrivateKeyResponse, RemoveAccessoryRequest,
-                         RemoveUserRequest, UpdateUserRequest, UserInfo,
-                         UsersResponse)
+from FindMy import FindMy
+from FindMy.exceptions import WrongColorFormat
+from helpers import (
+    CREDENTIALS_EXCEPTION,
+    CookieType,
+    TokenType,
+    create_access_token,
+    create_refresh_token,
+)
+from http_models import (
+    AccessoriesResponse,
+    AccessoryRequest,
+    AccessoryResponse,
+    AdvertisementRequest,
+    AdvertisementResponse,
+    ChangePasswordRequest,
+    CreateAccessoryRequest,
+    CreateUserRequest,
+    LocationsRequest,
+    LocationsResponse,
+    LoginResponse,
+    PrivateKeyResponse,
+    RemoveAccessoryRequest,
+    RemoveUserRequest,
+    UpdateUserRequest,
+    UserInfo,
+    UsersResponse,
+)
 
 findmy = FindMy()
 
