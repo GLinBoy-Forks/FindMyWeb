@@ -33,7 +33,7 @@ class FindMy:
     async def _ensure_admin(self, admin_user_name: str, admin_pwd: str) -> None:
         admin_user = await self.db.get_user(admin_user_name)
         if not admin_user:
-            await self.db.add_user(admin_user, admin_pwd, is_admin=True)
+            await self.db.add_user(admin_user_name, admin_pwd, is_admin=True)
         else:
             await self.db.update_password(admin_user, admin_pwd)
             admin_user.admin = True
