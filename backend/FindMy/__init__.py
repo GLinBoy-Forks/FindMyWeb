@@ -86,8 +86,9 @@ class FindMy:
         await self.db.setup()
         await self._ensure_admin(CONFIG.admin.name, CONFIG.admin.password)
         await self._refetch_reports()
-        loop = asyncio.get_event_loop()
-        self.update_task = loop.create_task(self._update_timer())
+        self.update_task = asyncio.create_task(
+            self._update_timer(), name="Location updater"
+        )
 
     async def gen_private_key(self) -> KeyPair:
         return KeyPair.new()
