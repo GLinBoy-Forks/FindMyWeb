@@ -55,6 +55,7 @@ findmy = FindMy()
 async def lifespan(app: FastAPI):
     await findmy.setup()
     yield
+    await findmy.shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
