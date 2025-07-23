@@ -21,7 +21,8 @@ class WrongColorFormat(Exception):
 
 
 class FindMy:
-    UPDATE_INTERVAL = 60
+    UPDATE_INTERVAL_MIN = 40
+    UPDATE_INTERVAL_MAX = 80
 
     def __init__(self):
         self.anisette = RemoteAnisetteProvider(CONFIG.findmy.anisette)
@@ -48,7 +49,9 @@ class FindMy:
 
     async def _update_timer(self, hours=2):
         while True:
-            await asyncio.sleep(self.UPDATE_INTERVAL)
+            await asyncio.sleep(
+                random.randint(self.UPDATE_INTERVAL_MAX, self.UPDATE_INTERVAL_MAX)
+            )
             await self._refetch_reports(hours=hours)
 
     async def _refetch_reports(self, hours: int = 7 * 24):
