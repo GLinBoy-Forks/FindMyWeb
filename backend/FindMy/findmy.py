@@ -93,6 +93,10 @@ class FindMy:
             self._update_timer(), name="Location updater"
         )
 
+    async def shutdown(self) -> None:
+        await self.account.close()
+        await self.db.shutdown()
+
     async def gen_private_key(self) -> KeyPair:
         return KeyPair.new()
 

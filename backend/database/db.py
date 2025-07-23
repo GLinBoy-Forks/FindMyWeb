@@ -4,8 +4,12 @@ from pyargon2 import hash
 from sqlmodel import Session, SQLModel, create_engine, desc, or_, select
 
 from const import CONFIG
-from database.exceptions import (AccessoryDoesntExist, AccessoryExists,
-                                 UserDoesNotExist, UserExists)
+from database.exceptions import (
+    AccessoryDoesntExist,
+    AccessoryExists,
+    UserDoesNotExist,
+    UserExists,
+)
 from database.models import Accessory, Location, User
 
 
@@ -41,6 +45,9 @@ class Database:
         return False
 
     async def setup(self) -> None:
+        pass
+
+    async def shutdown(self) -> None:
         pass
 
     async def get_users(self) -> list[User]:
