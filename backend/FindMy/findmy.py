@@ -9,6 +9,8 @@ import tomllib
 from findmy import KeyPair
 from findmy.reports import AsyncAppleAccount, RemoteAnisetteProvider
 
+from FindMy.exceptions import WrongColorFormat
+
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
 from database.models import Accessory, Location, User
