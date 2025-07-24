@@ -77,7 +77,7 @@ class FindMy:
                 ),
                 lat=report.latitude,
                 lon=report.longitude,
-                timestamp=report.timestamp,
+                timestamp=report.timestamp.astimezone(tz=datetime.timezone.utc),
                 accessory_key=accessory.private_key,
             )
             for report in reports
