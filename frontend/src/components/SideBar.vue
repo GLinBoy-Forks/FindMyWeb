@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Icon } from "@iconify/vue";
+
 import SidebarEntry from "./SidebarEntry.vue";
 import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
+import { locationDateString } from "../lib/helpers.ts";
 
 const emit = defineEmits(["selected", "newAccessory", "configure"]);
 
@@ -10,17 +12,6 @@ const show_sidebar = ref(true);
 const sidebarEntries = ref<Array<typeof SidebarEntry>>([]);
 
 const FindMyWebAPI = new FindMyWeb();
-
-const localLocale = new Intl.DateTimeFormat().resolvedOptions();
-
-const dateTimeFormatter = new Intl.DateTimeFormat(localLocale.locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-});
 
 let toggled: number | null = null;
 
@@ -47,9 +38,7 @@ async function updateTags(allTags: Accessory[]) {
         const locationResp = await FindMyWebAPI.getLocation(tag.name);
         let lastSeenStr = "Never";
         if (locationResp.locations && locationResp.locations.length > 0) {
-            // @ts-ignore: Date also takes iso strings
-            const lastDate = new Date(locationResp.locations[0].timestamp);
-            lastSeenStr = dateTimeFormatter.format(lastDate);
+            lastSeenStr = await locationDateString(locationResp.locations[0]);
         }
         // @ts-ignore: Dynamic indexing
         newTags[tag.name] = {

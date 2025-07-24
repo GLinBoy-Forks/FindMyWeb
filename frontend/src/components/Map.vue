@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 
 import { Accessory, Location } from "../lib/FindMyWeb.ts";
+import { locationDateString } from "../lib/helpers.ts";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
@@ -9,8 +10,6 @@ import maplibregl from "maplibre-gl";
 import { loadIcon } from "@iconify/vue";
 
 const mapdiv = ref(null);
-
-const dateTimeFormatter = new Intl.DateTimeFormat([], { day: "numeric", month: "short", year: "numeric" , hour: "numeric", minute: "numeric", second: "numeric"});
 
 let map: maplibregl.Map | null;
 let markers: maplibregl.Marker[] = [];
@@ -20,13 +19,6 @@ const mapObserver = new ResizeObserver(() => {
         map.resize();
     }
 });
-
-async function locationDateString(location: Location): Promise<string> {
-  if(!location.timestamp) {
-    return "No timestamp";
-  }
-  return dateTimeFormatter.format(new Date(location.timestamp));
-}
 
 async function b64Char(inp: number) : Promise<string> {
   return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[inp];
