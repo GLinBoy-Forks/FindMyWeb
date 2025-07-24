@@ -10,9 +10,7 @@ import { loadIcon } from "@iconify/vue";
 
 const mapdiv = ref(null);
 
-const localLocale = (new Intl.DateTimeFormat()).resolvedOptions();
-
-const dateTimeFormatter = new Intl.DateTimeFormat(localLocale.locale, { day: "numeric", month: "short", year: "numeric" , hour: "numeric", minute: "numeric", second: "numeric"});
+const dateTimeFormatter = new Intl.DateTimeFormat([], { day: "numeric", month: "short", year: "numeric" , hour: "numeric", minute: "numeric", second: "numeric"});
 
 let map: maplibregl.Map | null;
 let markers: maplibregl.Marker[] = [];
