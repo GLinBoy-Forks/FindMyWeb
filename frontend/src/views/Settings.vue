@@ -9,7 +9,7 @@ import FindMyWeb from "../lib/FindMyWeb";
 const FindMyWebAPI = new FindMyWeb();
 
 const router = useRouter();
-const settingsEntries = useTemplateRef("settingsEntries");
+const settingsEntries = useTemplateRef<typeof SettingsEntry>("settingsEntries");
 
 let previousEntry: typeof SettingsEntry | null = null;
 
@@ -37,6 +37,9 @@ async function init() {
 }
 
 async function update() {
+    if (!settingsEntries.value) {
+        return;
+    }
     if (previousEntry) {
         previousEntry.toggle(false);
     }
@@ -51,7 +54,9 @@ async function update() {
     if (!previousEntry) {
         router.push({ name: "settings-profile" });
     }
-    previousEntry.toggle(true);
+    if (previousEntry) {
+        previousEntry.toggle(true);
+    }
 }
 
 onMounted(async () => {
