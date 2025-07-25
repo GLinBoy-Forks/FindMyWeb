@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import { Icon } from "@iconify/vue";
 
 import SidebarEntry from "./SidebarEntry.vue";
@@ -9,7 +9,8 @@ import { locationDateString } from "../lib/helpers.ts";
 const emit = defineEmits(["selected", "newAccessory", "configure"]);
 
 const show_sidebar = ref(true);
-const sidebarEntries = ref<Array<typeof SidebarEntry>>([]);
+const sidebarEntries =
+    useTemplateRef<Array<typeof SidebarEntry>>("sidebarEntries");
 
 const FindMyWebAPI = new FindMyWeb();
 
