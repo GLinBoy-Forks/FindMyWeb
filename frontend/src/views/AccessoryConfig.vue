@@ -48,20 +48,16 @@ async function save() {
   }
 
   try {
+    const accessoryOptions = {
+      name: accessoryName.value,
+      color: selectedColor.value,
+      icon: selectedIcon.value,
+      private_key: privateKey.value,
+    };
     if (props.accessoryToConfigure) {
-      await FindMyWebAPI.updateAccessory({
-        name: accessoryName.value,
-        color: selectedColor.value,
-        icon: selectedIcon.value,
-        private_key: privateKey.value,
-      });
+      await FindMyWebAPI.updateAccessory(accessoryOptions);
     } else {
-      await FindMyWebAPI.createAccessory({
-        name: accessoryName.value,
-        color: selectedColor.value,
-        icon: selectedIcon.value,
-        private_key: privateKey.value,
-      });
+      await FindMyWebAPI.createAccessory(accessoryOptions);
     }
   } catch(error: any) {
     entryError.value = `${error.name}: ${error.detail()}`
