@@ -47,6 +47,10 @@ async function showMarkers() {
 
     for (let i = 0; i < accessories.length; i++) {
         const accessory = accessories[i];
+        if (!accessory.name) {
+            continue;
+        }
+
         const locationResp = await FindMyWebAPI.getLocation(accessory.name);
 
         if (!locationResp.location) {
