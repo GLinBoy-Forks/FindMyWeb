@@ -80,32 +80,40 @@ defineExpose({ updateSidebar, updateTags });
 </script>
 
 <template>
-    <div
-        v-show="show_sidebar"
-        class="absolute w-4/5 md:w-2/5 xs:w-1/3 xl:w-1/4 h-full z-10 bg-gray-700/90 bg-opacity-40 overflow-y-auto"
+    <Transition
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+        enter-active-class="transition duration-100"
+        leave-active-class="transition duration-100"
+        mode="out-in"
     >
-        <div class="flex flex-col gap-y-3 justify-start mx-5 my-5">
-            <SidebarEntry
-                ref="sidebarEntries"
-                v-for="(tag, index) in tags"
-                @click="onSelect(tag, index)"
-                @configure="onConfigure(tag.name)"
-                :name="tag.name"
-                :icon="tag.icon"
-                :color="tag.color"
-                :last-seen="tag.lastSeen"
-                :key="tag.name"
-            />
-            <button
-                class="my-5 py-1.5 px-1.5 w-full hover:bg-gray-800/60 rounded-3xl shadow-2xl border-2 border-gray-900"
-                @click="emit('newAccessory')"
-            >
-                <Icon
-                    class="size-14 mx-auto my-auto"
-                    icon="mdi:add"
-                    color="#ffffff"
+        <div
+            v-show="show_sidebar"
+            class="absolute w-4/5 md:w-2/5 xs:w-1/3 xl:w-1/4 h-full z-10 bg-gray-700/90 bg-opacity-40 overflow-y-auto"
+        >
+            <div class="flex flex-col gap-y-3 justify-start mx-5 my-5">
+                <SidebarEntry
+                    ref="sidebarEntries"
+                    v-for="(tag, index) in tags"
+                    @click="onSelect(tag, index)"
+                    @configure="onConfigure(tag.name)"
+                    :name="tag.name"
+                    :icon="tag.icon"
+                    :color="tag.color"
+                    :last-seen="tag.lastSeen"
+                    :key="tag.name"
                 />
-            </button>
+                <button
+                    class="my-5 py-1.5 px-1.5 w-full hover:bg-gray-800/60 rounded-3xl shadow-2xl border-2 border-gray-900"
+                    @click="emit('newAccessory')"
+                >
+                    <Icon
+                        class="size-14 mx-auto my-auto"
+                        icon="mdi:add"
+                        color="#ffffff"
+                    />
+                </button>
+            </div>
         </div>
-    </div>
+    </Transition>
 </template>
