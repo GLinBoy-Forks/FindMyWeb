@@ -2,7 +2,11 @@
 
 <template>
     <main>
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+            <KeepAlive :include="['Dashboard']">
+                <component :is="Component" />
+            </KeepAlive>
+        </RouterView>
     </main>
 </template>
 
