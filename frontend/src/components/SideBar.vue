@@ -89,7 +89,7 @@ defineExpose({ updateSidebar, updateTags });
                 ref="sidebarEntries"
                 v-for="(tag, index) in tags"
                 @click="onSelect(tag, index)"
-                @configure="onConfigure(tag)"
+                @configure="onConfigure(tag.name)"
                 :name="tag.name"
                 :icon="tag.icon"
                 :color="tag.color"
