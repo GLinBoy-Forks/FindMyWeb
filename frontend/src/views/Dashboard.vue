@@ -13,9 +13,9 @@ const router = useRouter();
 const updateDuration = 5;
 
 const FindMyWebAPI = new FindMyWeb();
-const sidebar = useTemplateRef("sidebar");
-const map = useTemplateRef("map");
-const header = useTemplateRef("header");
+const sidebar = useTemplateRef<typeof SideBar>("sidebar");
+const map = useTemplateRef<typeof Map>("map");
+const header = useTemplateRef<typeof Header>("header");
 const showOverlay = ref(false);
 
 const overlayAccessory = ref(null);
