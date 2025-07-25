@@ -20,7 +20,7 @@ let settingsOptions = ref({
     },
 });
 
-async function onToggle(route_name: string, index: number) {
+async function onToggle(route_name: string) {
     router.push({ name: route_name });
 }
 
@@ -81,7 +81,7 @@ onUpdated(async () => {
                     <SettingsEntry
                         ref="settingsEntries"
                         v-for="(config, route, index) in settingsOptions"
-                        @toggle="onToggle(route, index)"
+                        @toggle="onToggle(route)"
                         :route_name="route"
                         :icon="config.icon"
                         :name="config.name"
