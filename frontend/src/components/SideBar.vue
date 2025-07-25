@@ -82,7 +82,7 @@ defineExpose({ updateSidebar, updateTags });
 <template>
     <div
         v-show="show_sidebar"
-        class="absolute w-4/5 md:w-2/5 xs:w-1/3 xl:w-1/4 h-full z-10 bg-gray-700/90 bg-opacity-40 overflow-y-scroll"
+        class="absolute w-4/5 md:w-2/5 xs:w-1/3 xl:w-1/4 h-full z-10 bg-gray-700/90 bg-opacity-40 overflow-y-auto"
     >
         <div class="flex flex-col gap-y-3 justify-start mx-5 my-5">
             <SidebarEntry
