@@ -68,8 +68,12 @@ export class AdvertisementResponse {
   advertisement_key?: string;
 }
 
-export class LocationResponse {
+export class LocationsResponse {
   locations?: Location[];
+}
+
+export class LocationResponse {
+  location?: Location;
 }
 
 export class PrivateKeyResponse {
@@ -263,8 +267,8 @@ export default class FindMyWeb {
     accessoryName: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<LocationResponse> {
-    return await this._post<LocationResponse>(`locations`, {
+  ): Promise<LocationsResponse> {
+    return await this._post<LocationsResponse>(`locations`, {
       name: accessoryName,
       start: startDate.toISOString(),
       end: endDate.toISOString(),

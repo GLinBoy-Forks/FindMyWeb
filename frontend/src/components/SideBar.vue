@@ -37,8 +37,8 @@ async function updateTags(allTags: Accessory[]) {
 
         const locationResp = await FindMyWebAPI.getLocation(tag.name);
         let lastSeenStr = "Never";
-        if (locationResp.locations && locationResp.locations.length > 0) {
-            lastSeenStr = await locationDateString(locationResp.locations[0]);
+        if (locationResp.location) {
+            lastSeenStr = await locationDateString(locationResp.location);
         }
         // @ts-ignore: Dynamic indexing
         newTags[tag.name] = {

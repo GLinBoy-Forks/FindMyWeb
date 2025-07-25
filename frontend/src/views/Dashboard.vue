@@ -49,11 +49,11 @@ async function showMarkers() {
         const accessory = accessories[i];
         const locationResp = await FindMyWebAPI.getLocation(accessory.name);
 
-        if (!locationResp.locations || locationResp.locations.length <= 0) {
+        if (!locationResp.location) {
             continue;
         }
 
-        await map.value.showMarker(accessory, locationResp.locations[0]);
+        await map.value.showMarker(accessory, locationResp.location);
     }
 }
 
