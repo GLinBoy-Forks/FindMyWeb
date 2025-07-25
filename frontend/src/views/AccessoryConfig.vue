@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue';
-import FindMyWeb, { FindMyWebError } from '../lib/FindMyWeb';
+import FindMyWeb from '../lib/FindMyWeb';
 import IconPicker from 'iconify-icon-picker'
 import 'iconify-icon-picker/style.css'
 
