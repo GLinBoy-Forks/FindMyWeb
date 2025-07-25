@@ -25,7 +25,6 @@ async function onToggle(route_name: string) {
 }
 
 async function init() {
-    console.log(await FindMyWebAPI.isAdmin());
     if (await FindMyWebAPI.isAdmin()) {
         // @ts-ignore: Needed to add `settings-admin` dynamically
         settingsOptions.value["settings-admin"] = {
