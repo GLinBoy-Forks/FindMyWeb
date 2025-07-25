@@ -16,7 +16,7 @@ const FindMyWebAPI = new FindMyWeb();
 
 let toggled: number | null = null;
 
-let tags = ref({});
+let tags = ref<Array<any>>([]);
 
 async function updateSidebar(new_state: boolean) {
     show_sidebar.value = new_state;
@@ -24,11 +24,11 @@ async function updateSidebar(new_state: boolean) {
 
 async function updateTags(allTags: Accessory[]) {
     if (!allTags) {
-        tags.value = {};
+        tags.value = [];
         return;
     }
 
-    const newTags = {};
+    const newTags = [];
 
     for (let i = 0; i < allTags.length; i++) {
         const tag = allTags[i];
@@ -42,16 +42,20 @@ async function updateTags(allTags: Accessory[]) {
             lastSeenStr = await locationDateString(locationResp.location);
         }
         // @ts-ignore: Dynamic indexing
-        newTags[tag.name] = {
+        newTags.push({
+            name: tag.name,
             icon: tag.icon,
             color: tag.color,
             lastSeen: lastSeenStr,
-        };
+        });
     }
     tags.value = newTags;
 }
 
-async function onSelect(key: string, index: number) {
+async function onSelect(tag: any, index: number) {
+    if (!sidebarEntries.value) {
+        return;
+    }
     let newSelected = sidebarEntries.value[index];
     if (toggled == null || toggled != index) {
         if (toggled != null) {
@@ -60,7 +64,7 @@ async function onSelect(key: string, index: number) {
 
         newSelected.toggle(true);
         toggled = index;
-        emit("selected", key);
+        emit("selected", tag.name);
     } else {
         newSelected.toggle(false);
         toggled = null;
@@ -83,14 +87,14 @@ defineExpose({ updateSidebar, updateTags });
         <div class="flex flex-col gap-y-3 justify-start mx-5 my-5">
             <SidebarEntry
                 ref="sidebarEntries"
-                v-for="(tag, key, index) in tags"
-                @click="onSelect(key, index)"
-                @configure="onConfigure(key)"
-                :name="key"
+                v-for="(tag, index) in tags"
+                @click="onSelect(tag, index)"
+                @configure="onConfigure(tag)"
+                :name="tag.name"
                 :icon="tag.icon"
                 :color="tag.color"
                 :last-seen="tag.lastSeen"
-                :key="key"
+                :key="tag.name"
             />
             <button
                 class="my-5 py-1.5 px-1.5 w-full hover:bg-gray-800/60 rounded-3xl shadow-2xl border-2 border-gray-900"
