@@ -5,8 +5,8 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const FindMyWebAPI = new FindMyWeb();
 
-let username: string;
-let password: string;
+let username: string = "";
+let password: string = "";
 
 async function login() {
     try {
