@@ -5,7 +5,7 @@ import SideBar from "../components/SideBar.vue";
 import Header from "../components/Header.vue";
 import AccessoryConfig from "./AccessoryConfig.vue";
 
-import { onMounted, ref } from "vue";
+import { onMounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -13,9 +13,9 @@ const router = useRouter();
 const updateDuration = 5;
 
 const FindMyWebAPI = new FindMyWeb();
-const sidebar = ref(null);
-const map = ref(null);
-const header = ref(null);
+const sidebar = useTemplateRef("sidebar");
+const map = useTemplateRef("map");
+const header = useTemplateRef("header");
 const showOverlay = ref(false);
 
 const overlayAccessory = ref(null);
