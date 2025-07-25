@@ -15,15 +15,18 @@ const updateDuration = 5;
 const FindMyWebAPI = new FindMyWeb();
 const sidebar = ref(null);
 const map = ref(null);
+const header = ref(null);
 const showOverlay = ref(false);
 
 const overlayAccessory = ref(null);
 
+const currentAccessory = ref<Accessory | null>(null);
+
 let accessories: Accessory[] | null = null;
 
-async function accessoryByName(name: string) {
+async function accessoryByName(name: string): Promise<Accessory | null> {
     if (!accessories) {
-        return;
+        return null;
     }
 
     for (let i = 0; i < accessories.length; i++) {
@@ -60,18 +63,50 @@ async function onSelected(name: string | null) {
     }
 
     if (name != null) {
-        let accessory = await accessoryByName(name);
+        currentAccessory.value = await accessoryByName(name);
 
-        if (!accessory || !accessory.name) {
+        if (!currentAccessory.value || !currentAccessory.value.name) {
+            currentAccessory.value = null;
             return;
         }
+        const startDate = new Date();
 
-        let locationResp = await FindMyWebAPI.getLocations(accessory.name);
+        startDate.setHours(0, 0, 0, 0);
 
-        await map.value.showTrace(accessory, locationResp.locations);
+        const endDate = new Date();
+        await header.value.setDateRange(startDate, endDate);
+        let locationResp = await FindMyWebAPI.getLocations(
+            currentAccessory.value.name,
+            startDate,
+            endDate,
+        );
+
+        await map.value.showTrace(
+            currentAccessory.value,
+            locationResp.locations,
+        );
     } else {
+        currentAccessory.value = null;
+        await header.value.hideDatePicker();
         await showMarkers();
     }
+}
+
+async function onDateRangeChange(startDate: Date, endDate: Date) {
+    if (
+        !map ||
+        !map.value ||
+        !currentAccessory.value ||
+        !currentAccessory.value.name
+    ) {
+        return;
+    }
+    let locationResp = await FindMyWebAPI.getLocations(
+        currentAccessory.value.name,
+        startDate,
+        endDate,
+    );
+    await map.value.showTrace(currentAccessory.value, locationResp.locations);
 }
 
 async function loadTags() {
@@ -155,6 +190,8 @@ onMounted(async () => {
     </div>
     <div class="flex flex-col h-dvh">
         <Header
+            ref="header"
+            @date-range-changed="onDateRangeChange"
             @open-settings="router.push({ name: 'Settings' })"
             @sidebar-change="(state) => sidebar.updateSidebar(state)"
         />

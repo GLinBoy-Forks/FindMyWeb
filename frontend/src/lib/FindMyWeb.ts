@@ -259,9 +259,15 @@ export default class FindMyWeb {
     });
   }
 
-  async getLocations(accessoryName: string): Promise<LocationResponse> {
+  async getLocations(
+    accessoryName: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<LocationResponse> {
     return await this._post<LocationResponse>(`locations`, {
       name: accessoryName,
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
     });
   }
 
