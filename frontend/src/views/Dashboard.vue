@@ -162,7 +162,7 @@ async function onConfigure(name: string) {
     try {
         accessoryResponse = await FindMyWebAPI.getAccessory(name);
     } catch (error: any) {
-        console.log(`${error.name}: ${error.detail()}`);
+        console.error(`onConfigure: ${error.name}: ${error.detail()}`);
         await reloadTags();
         return;
     }
