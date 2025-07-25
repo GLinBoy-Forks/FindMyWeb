@@ -62,7 +62,7 @@ async function showMarkers() {
 }
 
 async function onSelected(name: string | null) {
-    if (!map || !map.value) {
+    if (!map || !map.value || !header.value) {
         return;
     }
 
