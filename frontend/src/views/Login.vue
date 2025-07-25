@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import FindMyWeb from "../lib/FindMyWeb";
 import { useRouter } from "vue-router";
+import { Icon } from "@iconify/vue";
+import { ref } from "vue";
 
 const router = useRouter();
+const isLoading = ref(false);
 const FindMyWebAPI = new FindMyWeb();
 
 let username: string = "";
@@ -10,7 +13,9 @@ let password: string = "";
 
 async function login() {
     try {
+        isLoading.value = true;
         await FindMyWebAPI.login(username, password);
+        isLoading.value = false;
     } catch (error) {
         alert(error);
         return;
@@ -61,14 +66,24 @@ async function login() {
                         </div>
 
                         <div class="col-span-1">
-                            <input
-                                type="submit"
-                                id="submit"
-                                name="submit"
-                                v-on:click="login()"
-                                value="Login"
-                                class="mt-1 w-full rounded-full border-gray-200 hover:bg-blue-700 bg-blue-600 text-m text-gray-300 shadow-sm p-2"
-                            />
+                            <div
+                                class="relative mt-1 w-full h-10 rounded-full text-m text-gray-300 border-gray-200 hover:bg-blue-700 bg-blue-600 shadow-sm p-2"
+                            >
+                                <input
+                                    type="submit"
+                                    id="submit"
+                                    name="submit"
+                                    v-on:click="login()"
+                                    value="Login"
+                                    class="w-full h-full"
+                                    :class="isLoading ? 'opacity-50' : ''"
+                                />
+                                <Icon
+                                    v-if="isLoading"
+                                    class="absolute size-full top-0 left-0"
+                                    icon="line-md:loading-loop"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
