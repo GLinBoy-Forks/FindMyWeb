@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, useTemplateRef } from "vue";
 
 import { Accessory, Location } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
@@ -9,7 +9,7 @@ import maplibregl from "maplibre-gl";
 
 import { loadIcon } from "@iconify/vue";
 
-const mapdiv = ref(null);
+const mapdiv = useTemplateRef("mapdiv");
 
 let map: maplibregl.Map | null;
 let markers: maplibregl.Marker[] = [];
