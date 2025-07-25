@@ -18,7 +18,7 @@ const map = useTemplateRef<typeof Map>("map");
 const header = useTemplateRef<typeof Header>("header");
 const showOverlay = ref(false);
 
-const overlayAccessory = ref(null);
+const overlayAccessory = ref<Accessory | null>(null);
 
 const currentAccessory = ref<Accessory | null>(null);
 
@@ -115,7 +115,9 @@ async function onDateRangeChange(startDate: Date, endDate: Date) {
 
 async function loadTags() {
     try {
-        accessories = (await FindMyWebAPI.getAccessories()).accessories;
+        const accessoriesResp = await FindMyWebAPI.getAccessories();
+        // @ts-ignore: API should never return empty response
+        accessories = accessoriesResp.accessories;
     } catch (error) {
         alert(error);
         router.push({ name: "Login" });
@@ -197,7 +199,7 @@ onMounted(async () => {
             ref="header"
             @date-range-changed="onDateRangeChange"
             @open-settings="router.push({ name: 'Settings' })"
-            @sidebar-change="(state) => sidebar.updateSidebar(state)"
+            @sidebar-change="(state) => sidebar?.updateSidebar(state)"
         />
         <div class="h-full w-full relative">
             <SideBar
