@@ -51,6 +51,8 @@ defineExpose({ setDateRange, hideDatePicker });
         <div class="justify-center mt-auto mb-auto ml-auto mr-auto">
             <VueDatePicker
                 @update:model-value="onDateRangeUpdate"
+                :clearable="false"
+                :max-date="new Date()"
                 v-if="dateRange.length > 0"
                 v-model="dateRange"
                 range
