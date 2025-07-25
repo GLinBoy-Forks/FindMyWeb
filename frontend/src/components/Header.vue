@@ -29,7 +29,7 @@ async function hideDatePicker() {
     dateRange.value = [];
 }
 
-async function onDateRangeUpdate(modelData) {
+async function onDateRangeUpdate(modelData: Date[]) {
     emit("dateRangeChanged", modelData[0], modelData[1]);
     dateRange.value = modelData;
 }
