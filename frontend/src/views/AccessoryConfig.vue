@@ -18,7 +18,7 @@ const privateKey = ref("");
 
 const entryError = ref("");
 
-const advertisementKey = ref(null);
+const advertisementKey = ref("");
 
 const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -129,8 +129,8 @@ onMounted(async () => {
                     <label class="text-white text-lg md:text-xl font-bold" for="private_key">Private Key:</label>
                     <input v-model="privateKey" :disabled="props.accessoryToConfigure" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="private_key" type="text">
 
-                    <label v-if="advertisementKey" class="text-white text-lg md:text-xl font-bold" for="advertisement_key">Advertisement Key:</label>
-                    <input v-if="advertisementKey" v-model="advertisementKey" :disabled="props.accessoryToConfigure" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="advertisement_key" type="text">
+                    <label v-if="advertisementKey.length > 0" class="text-white text-lg md:text-xl font-bold" for="advertisement_key">Advertisement Key:</label>
+                    <input v-if="advertisementKey.length > 0" v-model="advertisementKey" :disabled="props.accessoryToConfigure" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="advertisement_key" type="text">
 
                     <button class="mr-auto mt-6" @click="emit('cancel')">
                         <p class="text-2xl text-white font-bold bg-gray-500 hover:bg-gray-700 rounded-lg px-2 py-2 shadow-md shadow-gray-900">Cancel</p>
