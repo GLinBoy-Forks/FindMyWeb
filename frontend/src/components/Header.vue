@@ -29,6 +29,11 @@ async function hideDatePicker() {
     dateRange.value = [];
 }
 
+async function onDateRangeUpdate(modelData) {
+    emit("dateRangeChanged", modelData[0], modelData[1]);
+    dateRange.value = modelData;
+}
+
 defineExpose({ setDateRange, hideDatePicker });
 </script>
 
@@ -45,9 +50,7 @@ defineExpose({ setDateRange, hideDatePicker });
         </button>
         <div class="justify-center mt-auto mb-auto ml-auto mr-auto">
             <VueDatePicker
-                @update:model-value="
-                    emit('dateRangeChanged', dateRange[0], dateRange[1])
-                "
+                @update:model-value="onDateRangeUpdate"
                 v-if="dateRange.length > 0"
                 v-model="dateRange"
                 range
