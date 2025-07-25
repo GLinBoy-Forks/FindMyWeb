@@ -20,11 +20,14 @@ const entryError = ref("");
 
 const advertisementKey = ref("");
 
+const isLoading = ref(false);
+
 const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
 const props = defineProps(["accessoryToConfigure"]);
 
 async function save() {
+  isLoading.value = true;
   let error = false;
 
   entryError.value = "";
@@ -44,6 +47,7 @@ async function save() {
   }
 
   if(error) {
+    isLoading.value = false;
     return;
   }
 
@@ -61,9 +65,12 @@ async function save() {
     }
   } catch(error: any) {
     entryError.value = `${error.name}: ${error.detail()}`
+    isLoading.value = false;
     return;
   }
+
   emit("save");
+  isLoading.value = false;
 }
 
 async function deleteAccessory() {
@@ -135,11 +142,16 @@ onMounted(async () => {
                     <button class="mr-auto mt-6" @click="emit('cancel')">
                         <p class="text-2xl text-white font-bold bg-gray-500 hover:bg-gray-700 rounded-lg px-2 py-2 shadow-md shadow-gray-900">Cancel</p>
                     </button>
-
-                    <button class="ml-auto mt-6" @click="save">
-                        <p class="text-2xl text-white font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 shadow-md shadow-gray-900 ring-2 ring-blue-800">Save</p>
-                    </button>
-
+                    <div class="text-white relative shadow-md shadow-gray-900 ml-auto mt-6">
+                        <Icon
+                            v-if="isLoading"
+                            class="absolute size-full top-0 left-0"
+                            icon="line-md:loading-loop"
+                        />
+                        <button :disabled="isLoading" @click="save">
+                            <p class="text-2xl font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 ring-2 ring-blue-800" :class="isLoading ? 'opacity-20 ' : ''">Save</p>
+                        </button>
+                    </div>
                 </div>
                 <p class="text-red-400 font-bold ml-auto mt-3 text-end" v-if="entryError.length > 0">{{ entryError }}</p>
 
