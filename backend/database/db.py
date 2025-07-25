@@ -1,11 +1,16 @@
 import uuid
+import datetime
 
 from pyargon2 import hash
 from sqlmodel import Session, SQLModel, create_engine, desc, or_, select
 
 from const import CONFIG
-from database.exceptions import (AccessoryDoesntExist, AccessoryExists,
-                                 UserDoesNotExist, UserExists)
+from database.exceptions import (
+    AccessoryDoesntExist,
+    AccessoryExists,
+    UserDoesNotExist,
+    UserExists,
+)
 from database.models import Accessory, Location, User
 
 
@@ -94,12 +99,34 @@ class Database:
 
             return results.one_or_none()
 
+    async def get_last_location(self, accessory: Accessory) -> Location | None:
+        statement = (
+            select(Location)
+            .where(
+                Location.accessory_key == accessory.private_key,
+            )
+            .order_by(desc(Location.timestamp))
+            .limit(1)
+        )
+        with Session(self.engine) as session:
+            results = session.exec(statement=statement)
+
+            return results.one_or_none()
+
     async def get_locations(
-        self, accessory: Accessory, limit: int | None
+        self,
+        accessory: Accessory,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+        limit: int | None,
     ) -> list[Location]:
         statement = (
             select(Location)
-            .where(Location.accessory_key == accessory.private_key)
+            .where(
+                Location.accessory_key == accessory.private_key,
+                Location.timestamp >= start_date,
+                Location.timestamp <= end_date,
+            )
             .order_by(desc(Location.timestamp))
             .limit(limit)
         )

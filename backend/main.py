@@ -46,6 +46,8 @@ from http_models import (
     UpdateUserRequest,
     UserInfo,
     UsersResponse,
+    LocationRequest,
+    LocationResponse,
 )
 
 findmy = FindMy()
@@ -244,7 +246,11 @@ async def get_locations(
         user=current_user, name=locations_req.name
     ):
         return LocationsResponse(
-            locations=await findmy.get_locations(accessory=accessory)
+            locations=await findmy.get_locations(
+                accessory=accessory,
+                start_date=locations_req.start,
+                end_date=locations_req.end,
+            )
         )
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
@@ -254,13 +260,13 @@ async def get_locations(
 @api.post("/location")
 async def get_location(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    locations_req: LocationsRequest,
+    locations_req: LocationRequest,
 ):
     if accessory := await findmy.db.get_accessory(
         user=current_user, name=locations_req.name
     ):
-        return LocationsResponse(
-            locations=await findmy.get_locations(accessory=accessory, limit=1)
+        return LocationResponse(
+            location=await findmy.db.get_last_location(accessory=accessory)
         )
 
     raise HTTPException(

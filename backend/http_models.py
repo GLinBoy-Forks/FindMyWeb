@@ -33,6 +33,11 @@ class AccessoryBaseRequest(BaseModel):
 
 
 class LocationsRequest(AccessoryBaseRequest):
+    start: datetime.datetime
+    end: datetime.datetime
+
+
+class LocationRequest(AccessoryBaseRequest):
     pass
 
 
@@ -72,6 +77,10 @@ class AccessoryResponse(BaseModel):
 
 class LocationsResponse(BaseModel):
     locations: list[Location]
+
+
+class LocationResponse(BaseModel):
+    location: Location | None
 
 
 class PrivateKeyResponse(BaseModel):

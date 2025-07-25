@@ -99,9 +99,15 @@ class FindMy:
         return KeyPair.new()
 
     async def get_locations(
-        self, accessory: Accessory, limit: int | None = None
+        self,
+        accessory: Accessory,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+        limit: int | None = None,
     ) -> list[Location]:
-        return await self.db.get_locations(accessory=accessory, limit=limit)
+        return await self.db.get_locations(
+            accessory=accessory, start_date=start_date, end_date=end_date, limit=limit
+        )
 
     async def create_accessory(
         self,
