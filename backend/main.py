@@ -37,6 +37,8 @@ from http_models import (
     ChangePasswordRequest,
     CreateAccessoryRequest,
     CreateUserRequest,
+    LocationRequest,
+    LocationResponse,
     LocationsRequest,
     LocationsResponse,
     LoginResponse,
@@ -46,8 +48,6 @@ from http_models import (
     UpdateUserRequest,
     UserInfo,
     UsersResponse,
-    LocationRequest,
-    LocationResponse,
 )
 
 findmy = FindMy()
