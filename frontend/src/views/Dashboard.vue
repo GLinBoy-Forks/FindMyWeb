@@ -183,17 +183,25 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div
-        v-if="showOverlay"
-        id="overlay"
-        class="fixed w-dvw h-dvh top-0 left-0 right-0 bottom-0 bg-black/80 z-20"
+    <Transition
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+        enter-active-class="transition duration-300"
+        leave-active-class="transition duration-300"
+        mode="out-in"
     >
-        <AccessoryConfig
-            :accessory-to-configure="overlayAccessory"
-            @cancel="onSaveCancel"
-            @save="onSaveCancel"
-        />
-    </div>
+        <div
+            v-if="showOverlay"
+            id="overlay"
+            class="fixed w-dvw h-dvh top-0 left-0 right-0 bottom-0 bg-black/80 z-20"
+        >
+            <AccessoryConfig
+                :accessory-to-configure="overlayAccessory"
+                @cancel="onSaveCancel"
+                @save="onSaveCancel"
+            />
+        </div>
+    </Transition>
     <div class="flex flex-col h-dvh">
         <Header
             ref="header"
