@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUpdated } from "vue";
+import { ref, onMounted, onUpdated, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
 
@@ -9,7 +9,7 @@ import FindMyWeb from "../lib/FindMyWeb";
 const FindMyWebAPI = new FindMyWeb();
 
 const router = useRouter();
-const settingsEntries = ref([]);
+const settingsEntries = useTemplateRef("settingsEntries");
 
 let previousEntry: typeof SettingsEntry | null = null;
 
