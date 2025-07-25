@@ -49,14 +49,14 @@ async function save() {
 
   try {
     if (props.accessoryToConfigure) {
-      const newAccessory = await FindMyWebAPI.updateAccessory({
+      await FindMyWebAPI.updateAccessory({
         name: accessoryName.value,
         color: selectedColor.value,
         icon: selectedIcon.value,
         private_key: privateKey.value,
       });
     } else {
-      const newAccessory = await FindMyWebAPI.createAccessory({
+      await FindMyWebAPI.createAccessory({
         name: accessoryName.value,
         color: selectedColor.value,
         icon: selectedIcon.value,
