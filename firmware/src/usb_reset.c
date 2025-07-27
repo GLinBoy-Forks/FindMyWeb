@@ -1,5 +1,3 @@
-#include "usb_reset.h"
-
 #include <zephyr/device.h>
 #include <zephyr/drivers/retained_mem.h>
 #include <zephyr/drivers/uart/cdc_acm.h>
