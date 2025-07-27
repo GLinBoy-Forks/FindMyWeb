@@ -15,9 +15,9 @@ async function login() {
     try {
         isLoading.value = true;
         await FindMyWebAPI.login(username, password);
-        isLoading.value = false;
     } catch (error) {
         alert(error);
+        isLoading.value = false;
         return;
     }
     router.push({ name: "Dashboard" });
