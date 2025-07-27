@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from findmy.keys import KeyPair
 from jwt.exceptions import InvalidTokenError
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from const import CONFIG
@@ -126,6 +126,17 @@ async def login(
     )
 
     return LoginResponse(access_token=access_token, token_type="bearer")
+
+
+@api.get("/logout")
+async def logout(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> Response:
+    response = JSONResponse(content={"detail": "success"})
+    response.delete_cookie(
+        key=CookieType.REFRESH.value,
+    )
+    return response
 
 
 @api.get("/refresh")
