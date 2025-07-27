@@ -8,12 +8,11 @@ from typing import Annotated
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from findmy.keys import KeyPair
 from jwt.exceptions import InvalidTokenError
-from starlette.responses import JSONResponse, Response
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from const import CONFIG
 from database import Database
@@ -349,7 +348,9 @@ async def create_user(
             is_admin=create_user_req.is_admin,
         )
     except UserExists as ex:
-        raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
+        )
 
 
 @api.post("/user/remove")
@@ -369,7 +370,9 @@ async def remove_user(
     try:
         new_user = await findmy.db.remove_user(username=remove_user_req.name)
     except UserExists as ex:
-        raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
+        )
 
 
 @api.post("/user/update")
@@ -384,7 +387,8 @@ async def update_user(
     user = await findmy.db.get_user(update_user_req.name)
     if not user:
         raise HTTPException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=str("User does not exist")
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str("User does not exist"),
         )
 
     user = await findmy.db.update_password(user, update_user_req.password)
