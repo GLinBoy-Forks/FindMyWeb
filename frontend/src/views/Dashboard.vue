@@ -5,7 +5,14 @@ import SideBar from "../components/SideBar.vue";
 import Header from "../components/Header.vue";
 import AccessoryConfig from "./AccessoryConfig.vue";
 
-import { onMounted, ref, useTemplateRef } from "vue";
+import {
+    onMounted,
+    onBeforeUnmount,
+    onDeactivated,
+    onActivated,
+    ref,
+    useTemplateRef,
+} from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -23,6 +30,8 @@ const overlayAccessory = ref<Accessory | null>(null);
 const currentAccessory = ref<Accessory | null>(null);
 
 let accessories: Accessory[] | null = null;
+
+let refreshId: number | null = null;
 
 async function accessoryByName(name: string): Promise<Accessory | null> {
     if (!accessories) {
@@ -138,6 +147,21 @@ async function newAccessory() {
     showOverlay.value = true;
 }
 
+async function startInterval() {
+    await stopInterval();
+
+    refreshId = setInterval(() => {
+        reloadTags();
+    }, updateDuration * 1000);
+}
+
+async function stopInterval() {
+    if (refreshId) {
+        clearInterval(refreshId);
+        refreshId = null;
+    }
+}
+
 async function init() {
     if (!map || !map.value) {
         return;
@@ -145,9 +169,7 @@ async function init() {
 
     await reloadTags();
     await showMarkers();
-    setInterval(() => {
-        reloadTags();
-    }, updateDuration * 1000);
+    await startInterval();
 }
 
 async function onSaveCancel() {
@@ -176,6 +198,18 @@ async function onConfigure(name: string) {
     overlayAccessory.value = accessory;
     showOverlay.value = true;
 }
+
+onBeforeUnmount(async () => {
+    await stopInterval();
+});
+
+onDeactivated(async () => {
+    await stopInterval();
+});
+
+onActivated(async () => {
+    await startInterval();
+});
 
 onMounted(async () => {
     await init();

@@ -253,6 +253,11 @@ export default class FindMyWeb {
     return token;
   }
 
+  async logout() {
+    await this._get("logout");
+    localStorage.removeItem("token");
+  }
+
   async getAccessories(): Promise<AccessoriesResponse> {
     return await this._get<AccessoriesResponse>("accessories");
   }

@@ -58,6 +58,11 @@ async function update() {
     }
 }
 
+async function onLogout(route_name: string) {
+    await FindMyWebAPI.logout();
+    router.push({ name: route_name });
+}
+
 onMounted(async () => {
     await init();
 });
@@ -90,6 +95,13 @@ onUpdated(async () => {
                         :icon="config.icon"
                         :name="config.name"
                         :key="index"
+                    />
+                    <SettingsEntry
+                        @toggle="onLogout('Login')"
+                        route_name="Login"
+                        icon="mdi:logout"
+                        name="Logout"
+                        key="logout"
                     />
                 </div>
             </div>
