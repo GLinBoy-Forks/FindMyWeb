@@ -16,6 +16,10 @@ static void reset_into_dfu(const struct device *dev, uint32_t rate) {
         return;
     }
 
+
+    // wait a bit before killing serial device so nrfutil doesn't complain
+    k_msleep(10);
+
     if (!device_is_ready(gpregret1_dev)) {
         return;
     }
