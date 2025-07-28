@@ -5,6 +5,6 @@ project(fruitytag)
 
 target_sources(app PRIVATE src/main.c)
 
-if(CONFIG_HAS_ADAFRUIT_BOOTLOADER)
+if(CONFIG_NRF52_ADAFRUIT_BOOTLOADER)
     target_sources(app PRIVATE src/usb_reset.c)
 endif()

@@ -1,8 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
-mainmenu "Your Application Name"
+mainmenu "FruityTag"
 
 # Your application configuration options go here
+
+config NRF52_ADAFRUIT_BOOTLOADER
+	bool "Enable flashing through adafruit-nrfutil"
+	depends on SOC_SERIES_NRF52X
+	default y if (!BOARD_HAS_NRF5_BOOTLOADER && BUILD_OUTPUT_UF2)
+	help
+	    Device must use Adafruit nRF52 Bootloader as a bootloader
+
 
 # Sources Kconfig.zephyr in the Zephyr root directory.
 #
