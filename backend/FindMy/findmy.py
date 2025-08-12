@@ -14,7 +14,7 @@ from database import Database
 from database.models import Accessory, Location, User
 from database.exceptions import LocationExists
 
-from FindMy.exceptions import WrongColorFormat
+from FindMy.exceptions import WrongColorFormat, NotBase64
 
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
 
@@ -124,7 +124,10 @@ class FindMy:
         if not private_key_b64:
             private_key = KeyPair.new()
         else:
-            private_key = KeyPair.from_b64(private_key_b64)
+            try:
+                private_key = KeyPair.from_b64(private_key_b64)
+            except:
+                raise NotBase64("Provided key can't be decoded from base64.")
 
         if not COLOR_REGEX.match(color):
             raise WrongColorFormat(
