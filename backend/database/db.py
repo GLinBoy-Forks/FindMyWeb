@@ -10,6 +10,7 @@ from database.exceptions import (
     AccessoryExists,
     UserDoesNotExist,
     UserExists,
+    LocationExists,
 )
 from database.models import Accessory, Location, User
 
@@ -161,9 +162,10 @@ class Database:
 
         return accessory
 
-    async def add_location(self, location: Location) -> Location | None:
+    async def add_location(self, location: Location) -> Location:
         if await self._location_exists(location):
-            return None
+            raise LocationExists("Location already exists")
+
         with Session(self.engine) as session:
             session.add(location)
             session.commit()
