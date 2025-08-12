@@ -40,10 +40,7 @@ class Database:
         with Session(self.engine) as session:
             result = session.exec(statement)
 
-            if len(list(result.all())) > 0:
-                return True
-
-        return False
+            return len(list(result.all())) > 0
 
     async def setup(self) -> None:
         pass
