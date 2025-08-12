@@ -337,7 +337,7 @@ async def create_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     create_user_req: CreateUserRequest,
 ):
-    if not current_user.admin and current_user.username == create_user_req.name:
+    if not current_user.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
         )
@@ -358,7 +358,7 @@ async def remove_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     remove_user_req: RemoveUserRequest,
 ):
-    if not current_user.admin and current_user.username == remove_user_req.name:
+    if not current_user.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
         )
@@ -380,9 +380,14 @@ async def update_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     update_user_req: UpdateUserRequest,
 ):
-    if not current_user.admin and current_user.username == update_user_req.name:
+    if not current_user.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
+        )
+
+    if current_user.username == update_user_req.name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Can't remove yourself"
         )
     user = await findmy.db.get_user(update_user_req.name)
     if not user:
