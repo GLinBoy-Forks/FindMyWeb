@@ -152,10 +152,10 @@ class FindMy:
         icon: str,
         private_key_b64: str | None = None,
     ) -> Accessory:
-        if not private_key_b64:
-            private_key = KeyPair.new()
-        else:
+        try:
             private_key = KeyPair.from_b64(private_key_b64)
+        except:
+            raise NotBase64("Provided key can't be decoded from base64.")
 
         if not COLOR_REGEX.match(color):
             raise WrongColorFormat(
