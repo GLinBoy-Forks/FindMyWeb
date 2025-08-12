@@ -12,3 +12,7 @@ class UserExists(Exception):
 
 class UserDoesNotExist(Exception):
     """Raised when the user does not exist"""
+
+
+class LocationExists(Exception):
+    """Raised when the location already exists"""
