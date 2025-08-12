@@ -19,7 +19,7 @@ from database import Database
 from database.exceptions import AccessoryExists, UserExists
 from database.models import Accessory, User
 from FindMy import FindMy
-from FindMy.exceptions import WrongColorFormat
+from FindMy.exceptions import WrongColorFormat, NotBase64
 from helpers import (
     CREDENTIALS_EXCEPTION,
     CookieType,
@@ -206,7 +206,7 @@ async def create_accessory(
             icon=accessory_req.icon,
             private_key_b64=accessory_req.private_key,
         )
-    except (WrongColorFormat, AccessoryExists) as ex:
+    except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
         )
@@ -227,7 +227,7 @@ async def update_accessory(
             icon=accessory_req.icon,
             private_key_b64=accessory_req.private_key,
         )
-    except (WrongColorFormat, AccessoryExists) as ex:
+    except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
         )
