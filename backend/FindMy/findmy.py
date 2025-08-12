@@ -12,6 +12,8 @@ from findmy.reports import AsyncAppleAccount, RemoteAnisetteProvider
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
 from database.models import Accessory, Location, User
+from database.exceptions import LocationExists
+
 from FindMy.exceptions import WrongColorFormat
 
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
@@ -57,7 +59,10 @@ class FindMy:
             for accessory in accessories:
                 locations = await self._fetch_locations(accessory, hours=hours)
                 for location in locations:
-                    await self.db.add_location(location)
+                    try:
+                        await self.db.add_location(location)
+                    except LocationExists:
+                        pass
 
     async def _fetch_locations(
         self, accessory: Accessory, hours: int = 7 * 24
