@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
+import { locationDate } from "../lib/helpers.ts";
+
 import Map from "../components/Map.vue";
 import SideBar from "../components/SideBar.vue";
 import Header from "../components/Header.vue";
@@ -82,11 +84,22 @@ async function onSelected(name: string | null) {
             currentAccessory.value = null;
             return;
         }
-        const startDate = new Date();
+        const lastLocation = await FindMyWebAPI.getLocation(
+            currentAccessory.value.name,
+        );
+        if (!lastLocation.location) {
+            return;
+        }
 
-        startDate.setHours(0, 0, 0, 0);
+        const endDate = await locationDate(lastLocation.location);
+        if (!endDate) {
+            return;
+        }
 
-        const endDate = new Date();
+        const startDate = new Date(endDate);
+
+        startDate.setDate(Math.max(endDate.getDate() - 1, 1));
+
         await header.value.setDateRange(startDate, endDate);
         let locationResp = await FindMyWebAPI.getLocations(
             currentAccessory.value.name,

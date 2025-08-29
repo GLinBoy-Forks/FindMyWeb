@@ -9,10 +9,18 @@ const dateTimeFormatter = new Intl.DateTimeFormat([], {
   second: "numeric",
 });
 
-export async function locationDateString(location: Location): Promise<string> {
+export async function locationDate(location: Location): Promise<Date | null> {
   if (!location.timestamp) {
-    return "No timestamp";
+    return null;
   }
   // Append 'Z' so ts knows this is a UTC date
-  return dateTimeFormatter.format(new Date(location.timestamp + "Z"));
+  return new Date(location.timestamp + "Z");
+}
+
+export async function locationDateString(location: Location): Promise<string> {
+  const date = await locationDate(location);
+  if (!date) {
+    return "No timestamp";
+  }
+  return dateTimeFormatter.format(date);
 }
