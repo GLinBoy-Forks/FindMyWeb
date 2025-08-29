@@ -233,7 +233,7 @@ async def update_accessory(
     return new_accessory
 
 
-@api.post("/remove")
+@api.post("/remove", status_code=status.HTTP_200_OK)
 async def remove_accessory(
     current_user: Annotated[User, Depends(get_current_active_user)],
     remove_accessory_req: RemoveAccessoryRequest,
@@ -299,7 +299,7 @@ async def get_advertise_key(
     return AdvertisementResponse(advertisement_key=key_pair.adv_key_b64)
 
 
-@api.post("/change_password")
+@api.post("/change_password", status_code=status.HTTP_200_OK)
 async def change_password(
     current_user: Annotated[User, Depends(get_current_active_user)],
     change_password_req: ChangePasswordRequest,
@@ -324,7 +324,7 @@ async def get_users(current_user: Annotated[User, Depends(get_current_active_use
     )
 
 
-@api.post("/user/create")
+@api.post("/user/create", status_code=status.HTTP_200_OK)
 async def create_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     create_user_req: CreateUserRequest,
@@ -344,7 +344,7 @@ async def create_user(
         )
 
 
-@api.post("/user/remove")
+@api.post("/user/remove", status_code=status.HTTP_200_OK)
 async def remove_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     remove_user_req: RemoveUserRequest,
@@ -365,7 +365,7 @@ async def remove_user(
         )
 
 
-@api.post("/user/update")
+@api.post("/user/update", status_code=status.HTTP_200_OK)
 async def update_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
     update_user_req: UpdateUserRequest,
