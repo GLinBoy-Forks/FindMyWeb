@@ -1,28 +1,21 @@
-import asyncio
-import os
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
+from const import CONFIG
+from database.exceptions import AccessoryExists, UserExists
+from database.models import Accessory, User
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from findmy.keys import KeyPair
-from jwt.exceptions import InvalidTokenError
-
-from const import CONFIG
-from database import Database
-from database.exceptions import AccessoryExists, UserExists
-from database.models import Accessory, User
 from FindMy import FindMy
-from FindMy.exceptions import WrongColorFormat, NotBase64
+from FindMy.exceptions import NotBase64, WrongColorFormat
 from helpers import (
-    CREDENTIALS_EXCEPTION,
     ACCESSORY_NOT_FOUND_EXCEPTION,
+    CREDENTIALS_EXCEPTION,
     CookieType,
     TokenType,
     create_access_token,
@@ -49,6 +42,7 @@ from http_models import (
     UserInfo,
     UsersResponse,
 )
+from jwt.exceptions import InvalidTokenError
 
 findmy = FindMy()
 
