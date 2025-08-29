@@ -148,8 +148,8 @@ async def refresh(request: Request):
             algorithms=[CONFIG.jwt.algorithm],
         )
         token_type = payload.get("type", None)
-
         userid_str = payload.get("userid", None)
+
         if token_type != TokenType.REFRESH.value or userid_str is None:
             raise CREDENTIALS_EXCEPTION
 
