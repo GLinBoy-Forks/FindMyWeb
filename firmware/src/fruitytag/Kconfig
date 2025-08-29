@@ -1,0 +1,3 @@
+module = FRUITYTAG
+module-str = fruitytag
+source "subsys/logging/Kconfig.template.log_config"

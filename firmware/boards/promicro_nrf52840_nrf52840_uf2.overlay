@@ -3,3 +3,50 @@
 /delete-node/ &storage_partition;
 /delete-node/ &boot_partition;
 #include <nordic/nrf52840_partition_uf2_sdv7.dtsi>
+
+/ {
+	vcc_3v3: vcc_3v3 {
+		compatible = "regulator-fixed";
+
+		regulator-name = "reg-vcc-3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+        // Should be ACTIVE_HIGH but https://github.com/zephyrproject-rtos/zephyr/pull/89973 not in nrf-sdk yet
+		enable-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+
+		regulator-boot-on;
+		status = "okay";
+	};
+};
+
+&uart1 {
+    status = "disabled";
+};
+
+&uart0 {
+    status = "disabled";
+};
+
+&gpio1 {
+    status = "disabled";
+};
+
+&i2c0 {
+    status = "disabled";
+};
+
+&i2c1 {
+    status = "disabled";
+};
+
+&spi2 {
+    status = "disabled";
+};
+
+&pwm0 {
+	status = "disabled";
+};
+
+&ieee802154 {
+    status = "disabled";
+};

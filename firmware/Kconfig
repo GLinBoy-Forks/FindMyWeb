@@ -11,11 +11,14 @@ config NRF52_ADAFRUIT_BOOTLOADER
 	help
 	    Device must use Adafruit nRF52 Bootloader as a bootloader
 
+config FRUITYTAG_ADVERTISEMENT_INTERVAL
+    int "Advertisement interval"
+    range 1 10000
+    default 2000
+    help
+        The interval between advertisements in ms
 
-# Sources Kconfig.zephyr in the Zephyr root directory.
-#
-# Note: All 'source' statements work relative to the Zephyr root directory (due
-# to the $srctree environment variable being set to $ZEPHYR_BASE). If you want
-# to 'source' relative to the current Kconfig file instead, use 'rsource' (or a
-# path relative to the Zephyr root).
+rsource "src/fruitytag/Kconfig"
+rsource "src/keystore/Kconfig"
+
 source "Kconfig.zephyr"
