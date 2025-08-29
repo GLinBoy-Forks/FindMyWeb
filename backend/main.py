@@ -287,10 +287,7 @@ async def get_advertise_key(
 ) -> AdvertisementResponse:
     key_pair = await findmy.get_key_pair_by_name(current_user, advertisement_req.name)
     if not key_pair:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No accessory with the provided name was found",
-        )
+        raise ACCESSORY_NOT_FOUND_EXCEPTION
 
     return AdvertisementResponse(advertisement_key=key_pair.adv_key_b64)
 
