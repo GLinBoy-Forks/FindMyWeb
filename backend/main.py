@@ -16,6 +16,8 @@ from FindMy.exceptions import NotBase64, WrongColorFormat
 from helpers import (
     ACCESSORY_NOT_FOUND_EXCEPTION,
     CREDENTIALS_EXCEPTION,
+    USER_NOT_FOUND_EXCEPTION,
+    USER_NOT_PERMITTED_EXCEPTION,
     CookieType,
     TokenType,
     create_access_token,
@@ -105,9 +107,7 @@ async def login(
 ) -> LoginResponse:
     user = await findmy.db.get_user(login_data.username)
     if not user or not await findmy.db.verify(user, login_data.password):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
-        )
+        raise USER_NOT_PERMITTED_EXCEPTION
 
     access_token = create_access_token(
         data={"userid": str(user.id), "is_admin": user.admin, "username": user.username}
@@ -310,9 +310,7 @@ async def change_password(
 @api.get("/users")
 async def get_users(current_user: Annotated[User, Depends(get_current_active_user)]):
     if not current_user.admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
-        )
+        raise USER_NOT_PERMITTED_EXCEPTION
     all_users = await findmy.db.get_users()
 
     return UsersResponse(
@@ -326,9 +324,7 @@ async def create_user(
     create_user_req: CreateUserRequest,
 ):
     if not current_user.admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
-        )
+        raise USER_NOT_PERMITTED_EXCEPTION
     try:
         await findmy.db.add_user(
             username=create_user_req.name,
@@ -347,9 +343,7 @@ async def remove_user(
     remove_user_req: RemoveUserRequest,
 ):
     if not current_user.admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
-        )
+        raise USER_NOT_PERMITTED_EXCEPTION
 
     if current_user.username == remove_user_req.name:
         raise HTTPException(
@@ -369,9 +363,7 @@ async def update_user(
     update_user_req: UpdateUserRequest,
 ):
     if not current_user.admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
-        )
+        raise USER_NOT_PERMITTED_EXCEPTION
 
     if current_user.username == update_user_req.name:
         raise HTTPException(
@@ -379,10 +371,7 @@ async def update_user(
         )
     user = await findmy.db.get_user(update_user_req.name)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str("User does not exist"),
-        )
+        raise USER_NOT_FOUND_EXCEPTION
 
     user = await findmy.db.update_password(user, update_user_req.password)
     if user.admin != update_user_req.is_admin:
