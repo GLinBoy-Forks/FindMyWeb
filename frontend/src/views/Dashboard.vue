@@ -98,7 +98,7 @@ async function onSelected(name: string | null) {
 
         const startDate = new Date(endDate);
 
-        startDate.setDate(Math.max(endDate.getDate() - 1, 1));
+        startDate.setDate(endDate.getDate() - 1);
 
         await header.value.setDateRange(startDate, endDate);
         let locationResp = await FindMyWebAPI.getLocations(
