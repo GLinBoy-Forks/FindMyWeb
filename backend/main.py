@@ -387,7 +387,7 @@ async def update_user(
 
     if current_user.username == update_user_req.name:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Can't remove yourself"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Can't update yourself"
         )
     user = await findmy.db.get_user(update_user_req.name)
     if not user:
