@@ -14,6 +14,10 @@ CREDENTIALS_EXCEPTION = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
+ACCESSORY_NOT_FOUND_EXCEPTION = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
+)
+
 
 class TokenType(Enum):
     ACCESS = "access"

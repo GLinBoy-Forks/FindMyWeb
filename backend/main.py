@@ -22,6 +22,7 @@ from FindMy import FindMy
 from FindMy.exceptions import WrongColorFormat, NotBase64
 from helpers import (
     CREDENTIALS_EXCEPTION,
+    ACCESSORY_NOT_FOUND_EXCEPTION,
     CookieType,
     TokenType,
     create_access_token,
@@ -180,9 +181,7 @@ async def get_accessory(
     ):
         return AccessoryResponse(accessory=accessory)
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
-    )
+    raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
 @api.get("/accessories")
@@ -241,10 +240,7 @@ async def remove_accessory(
     accessory_req: RemoveAccessoryRequest,
 ):
     if not await findmy.remove_accessory(user=current_user, name=accessory_req.name):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No accessory with the provided name was found",
-        )
+        raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
 @api.post("/locations")
@@ -262,9 +258,7 @@ async def get_locations(
                 end_date=locations_req.end,
             )
         )
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
-    )
+    raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
 @api.post("/location")
@@ -279,9 +273,7 @@ async def get_location(
             location=await findmy.db.get_last_location(accessory=accessory)
         )
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
-    )
+    raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
 @api.get("/privatekey")
