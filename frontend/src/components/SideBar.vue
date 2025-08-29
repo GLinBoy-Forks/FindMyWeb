@@ -47,6 +47,7 @@ async function updateTags(allTags: Accessory[]) {
             icon: tag.icon,
             color: tag.color,
             lastSeen: lastSeenStr,
+            active: true ? locationResp.location : false,
         });
     }
     tags.value = newTags;
@@ -95,16 +96,17 @@ defineExpose({ updateSidebar, updateTags });
                 <SidebarEntry
                     ref="sidebarEntries"
                     v-for="(tag, index) in tags"
-                    @click="onSelect(tag, index)"
+                    @click="tag.active ? onSelect(tag, index) : null"
                     @configure="onConfigure(tag.name)"
                     :name="tag.name"
                     :icon="tag.icon"
                     :color="tag.color"
                     :last-seen="tag.lastSeen"
+                    :active="tag.active"
                     :key="tag.name"
                 />
                 <button
-                    class="my-5 py-1.5 px-1.5 w-full hover:bg-gray-800/60 rounded-3xl shadow-2xl border-2 border-gray-900"
+                    class="my-5 py-1.5 px-1.5 w-full hover:bg-gray-800/60 rounded-3xl shadow-2xl border-2 border-gray-900 cursor-pointer"
                     @click="emit('newAccessory')"
                 >
                     <Icon
