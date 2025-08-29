@@ -1,0 +1,11 @@
+﻿---
+BasedOnStyle: WebKit
+AlignAfterOpenBracket: Align
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortIfStatementsOnASingleLine: Never
+BreakBeforeBraces: Attach
+CompactNamespaces: 'false'
+IndentWidth: '2'
+
+...
