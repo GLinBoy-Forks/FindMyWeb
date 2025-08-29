@@ -189,15 +189,15 @@ async def get_accessories(
 @api.post("/create")
 async def create_accessory(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    accessory_req: CreateAccessoryRequest,
+    create_accessory_req: CreateAccessoryRequest,
 ) -> Accessory:
     try:
         new_accessory = await findmy.create_accessory(
             user=current_user,
-            name=accessory_req.name,
-            color=accessory_req.color,
-            icon=accessory_req.icon,
-            private_key_b64=accessory_req.private_key,
+            name=create_accessory_req.name,
+            color=create_accessory_req.color,
+            icon=create_accessory_req.icon,
+            private_key_b64=create_accessory_req.private_key,
         )
     except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
@@ -210,15 +210,15 @@ async def create_accessory(
 @api.post("/update")
 async def update_accessory(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    accessory_req: CreateAccessoryRequest,
+    update_accessory_req: CreateAccessoryRequest,
 ) -> Accessory:
     try:
         new_accessory = await findmy.update_accessory(
             user=current_user,
-            name=accessory_req.name,
-            color=accessory_req.color,
-            icon=accessory_req.icon,
-            private_key_b64=accessory_req.private_key,
+            name=update_accessory_req.name,
+            color=update_accessory_req.color,
+            icon=update_accessory_req.icon,
+            private_key_b64=update_accessory_req.private_key,
         )
     except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
@@ -231,9 +231,11 @@ async def update_accessory(
 @api.post("/remove")
 async def remove_accessory(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    accessory_req: RemoveAccessoryRequest,
+    remove_accessory_req: RemoveAccessoryRequest,
 ):
-    if not await findmy.remove_accessory(user=current_user, name=accessory_req.name):
+    if not await findmy.remove_accessory(
+        user=current_user, name=remove_accessory_req.name
+    ):
         raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
@@ -296,13 +298,13 @@ async def get_advertise_key(
 @api.post("/change_password")
 async def change_password(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    change_req: ChangePasswordRequest,
+    change_password_req: ChangePasswordRequest,
 ):
-    if not await findmy.db.verify(current_user, change_req.old_password):
+    if not await findmy.db.verify(current_user, change_password_req.old_password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Old password is incorrect"
         )
-    await findmy.db.update_password(current_user, change_req.new_password)
+    await findmy.db.update_password(current_user, change_password_req.new_password)
 
 
 @api.get("/users")
@@ -328,7 +330,7 @@ async def create_user(
             status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
         )
     try:
-        new_user = await findmy.db.add_user(
+        await findmy.db.add_user(
             username=create_user_req.name,
             password=create_user_req.password,
             is_admin=create_user_req.is_admin,
@@ -354,7 +356,7 @@ async def remove_user(
             status_code=status.HTTP_403_FORBIDDEN, detail="Can't remove yourself"
         )
     try:
-        new_user = await findmy.db.remove_user(username=remove_user_req.name)
+        await findmy.db.remove_user(username=remove_user_req.name)
     except UserExists as ex:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
