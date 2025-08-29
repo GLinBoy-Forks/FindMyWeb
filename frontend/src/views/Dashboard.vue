@@ -143,6 +143,11 @@ async function reloadTags() {
     sidebar.value.updateTags(accessories);
 }
 
+async function reloadAndShow() {
+    await reloadTags();
+    await showMarkers();
+}
+
 async function newAccessory() {
     showOverlay.value = true;
 }
@@ -167,16 +172,14 @@ async function init() {
         return;
     }
 
-    await reloadTags();
-    await showMarkers();
+    await reloadAndShow();
     await startInterval();
 }
 
 async function onSaveCancel() {
-    await reloadTags();
-    await showMarkers();
     showOverlay.value = false;
     overlayAccessory.value = null;
+    reloadAndShow();
 }
 
 async function onConfigure(name: string) {
