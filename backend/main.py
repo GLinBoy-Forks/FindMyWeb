@@ -89,6 +89,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
     except (InvalidTokenError, TypeError) as ex:
         raise CREDENTIALS_EXCEPTION
+
     user = await findmy.db.get_user_by_id(userid)
     if user is None:
         raise CREDENTIALS_EXCEPTION
@@ -156,6 +157,7 @@ async def refresh(request: Request):
 
     except (InvalidTokenError, TypeError):
         raise CREDENTIALS_EXCEPTION
+
     user = await findmy.db.get_user_by_id(userid)
 
     if not user:
@@ -183,6 +185,7 @@ async def get_accessories(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> AccessoriesResponse:
     accessories = await findmy.db.get_accessories_by_user(current_user)
+
     return AccessoriesResponse(accessories=accessories)
 
 
@@ -199,6 +202,7 @@ async def create_accessory(
             icon=create_accessory_req.icon,
             private_key_b64=create_accessory_req.private_key,
         )
+
     except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
@@ -220,6 +224,7 @@ async def update_accessory(
             icon=update_accessory_req.icon,
             private_key_b64=update_accessory_req.private_key,
         )
+
     except (WrongColorFormat, NotBase64, AccessoryExists) as ex:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex)
@@ -254,6 +259,7 @@ async def get_locations(
                 end_date=locations_req.end,
             )
         )
+
     raise ACCESSORY_NOT_FOUND_EXCEPTION
 
 
@@ -277,6 +283,7 @@ async def create_private_key(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> PrivateKeyResponse:
     new_priv_key = await findmy.gen_private_key()
+
     return PrivateKeyResponse(private_key=new_priv_key.private_key_b64)
 
 
@@ -301,6 +308,7 @@ async def change_password(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Old password is incorrect"
         )
+
     await findmy.db.update_password(current_user, change_password_req.new_password)
 
 
@@ -308,6 +316,7 @@ async def change_password(
 async def get_users(current_user: Annotated[User, Depends(get_current_active_user)]):
     if not current_user.admin:
         raise USER_NOT_PERMITTED_EXCEPTION
+
     all_users = await findmy.db.get_users()
 
     return UsersResponse(
@@ -322,6 +331,7 @@ async def create_user(
 ):
     if not current_user.admin:
         raise USER_NOT_PERMITTED_EXCEPTION
+
     try:
         await findmy.db.add_user(
             username=create_user_req.name,
@@ -346,6 +356,7 @@ async def remove_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Can't remove yourself"
         )
+
     try:
         await findmy.db.remove_user(username=remove_user_req.name)
     except UserExists as ex:
@@ -366,6 +377,7 @@ async def update_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Can't update yourself"
         )
+
     user = await findmy.db.get_user(update_user_req.name)
     if not user:
         raise USER_NOT_FOUND_EXCEPTION
