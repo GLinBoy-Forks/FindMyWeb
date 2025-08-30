@@ -11,5 +11,6 @@ target_sources(app PRIVATE src/keystore/keystore.c)
 target_sources(app PRIVATE src/fruitytag/fruitytag.c)
 
 if(CONFIG_NRF52_ADAFRUIT_BOOTLOADER)
+    target_sources(app PRIVATE src/adafruit_bootloader/adafruit_bootloader.c)
     target_sources(app PRIVATE src/usb_reset.c)
 endif()

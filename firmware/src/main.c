@@ -203,7 +203,7 @@ int main(void) {
     goto exit_and_blink;
   }
 
-  err = fruitytag_advertise(&tag, true);
+  err = fruitytag_advertise(&tag, true, true);
   if (err) {
     LOG_ERR("Couldn't start advertising: %d", err);
     goto exit_and_blink;
