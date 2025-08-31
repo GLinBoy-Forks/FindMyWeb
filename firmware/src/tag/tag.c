@@ -10,7 +10,7 @@ int tag_set_public_key(tag_advertisement* adv_data, uint8_t* public_key, size_t 
   return 0;
 }
 
-int tag_bt_address(uint8_t* address, size_t address_len, uint8_t* public_key, size_t public_key_len) {
+int tag_bt_address(uint8_t* address, size_t address_len, uint8_t* public_key, size_t public_key_len, bool rev_mac) {
   if (public_key_len != TAG_PUBLIC_KEY_LENGTH) {
     return -EINVAL;
   }
@@ -18,12 +18,12 @@ int tag_bt_address(uint8_t* address, size_t address_len, uint8_t* public_key, si
     return -EINVAL;
   }
 
-  address[0] = public_key[0] | 0b11000000;
-  address[1] = public_key[1];
-  address[2] = public_key[2];
-  address[3] = public_key[3];
-  address[4] = public_key[4];
-  address[5] = public_key[5];
+  address[rev_mac ? 5 : 0] = public_key[0] | 0b11000000;
+  address[rev_mac ? 4 : 1] = public_key[1];
+  address[rev_mac ? 3 : 2] = public_key[2];
+  address[rev_mac ? 2 : 3] = public_key[3];
+  address[rev_mac ? 1 : 4] = public_key[4];
+  address[rev_mac ? 0 : 5] = public_key[5];
 
   return 0;
 }

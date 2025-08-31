@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +32,7 @@ typedef enum {
 
 #define TAG_COMPANY_ID 0x004c // Apple
 
-#define TAG_ADVERTISEMENT {                                                                                                         \
+#define DEFAULT_TAG_ADVERTISEMENT {                                                                                                 \
   0x1e,                                                                                                                             \
   0xff,                                                                                                                             \
   TAG_COMPANY_ID,                                                                                                                   \
@@ -44,4 +45,4 @@ typedef enum {
 }
 
 int tag_set_public_key(tag_advertisement* adv_data, uint8_t* public_key, size_t public_key_len);
-int tag_bt_address(uint8_t* address, size_t address_len, uint8_t* public_key, size_t public_key_len);
+int tag_bt_address(uint8_t* address, size_t address_len, uint8_t* public_key, size_t public_key_len, bool rev_mac);
