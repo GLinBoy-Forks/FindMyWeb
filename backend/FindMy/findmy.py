@@ -9,7 +9,7 @@ from findmy.reports import AsyncAppleAccount, RemoteAnisetteProvider
 
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
-from database.models import Accessory, Location, User
+from database.models import Accessory, Location, User, BatteryLevel
 from database.exceptions import LocationExists
 
 from FindMy.exceptions import WrongColorFormat, NotBase64
@@ -80,6 +80,10 @@ class FindMy:
                 lat=report.latitude,
                 lon=report.longitude,
                 timestamp=report.timestamp.astimezone(tz=datetime.timezone.utc),
+                battery_level=BatteryLevel.from_status(report.status),
+                status=report.status,
+                confidence=report.confidence,
+                horizontal_accuracy=report.horizontal_accuracy,
                 accessory_key=accessory.private_key,
             )
             for report in reports
