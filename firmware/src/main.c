@@ -78,7 +78,7 @@ int main(void) {
     goto blink_and_exit;
   }
 
-  snprintf(bt_name, sizeof(bt_name), "FruityTag-%02x", tag.bt_address[5]);
+  snprintf(bt_name, sizeof(bt_name), "FruityTag-%02x", pub_key[0]);
   err = bt_set_name(bt_name);
   if (err) {
     LOG_ERR("Couldn't set name to %s", bt_name);
