@@ -22,11 +22,22 @@ export class FindMyWebError extends Error {
   }
 }
 
+export enum BatteryLevel {
+  Full = 0b00,
+  Medium = 0b01,
+  Low = 0b10,
+  Critical = 0b11,
+}
+
 export class Location {
   id?: string;
   lat?: number;
   lon?: number;
   timestamp?: string;
+  battery_level?: BatteryLevel;
+  status?: number;
+  confidence?: number;
+  horizontal_accuracy?: number;
   accessory_key?: string;
 }
 

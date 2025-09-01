@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, useTemplateRef } from "vue";
 
-import { Accessory, Location } from "../lib/FindMyWeb.ts";
+import { Accessory, Location, BatteryLevel } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -92,6 +92,7 @@ async function getHtmlForLocation(header: string, name: string, location: Locati
     <b>:</b>
   </h1>
   <p>(${location.lat} ${location.lon})</p>
+  <p>Battery: ${location.battery_level != null ? BatteryLevel[location.battery_level] : 'Not Found'}</p>
   <p>
     <u>
       <a href=${await geoUri(name, location)}>geo URI</a>

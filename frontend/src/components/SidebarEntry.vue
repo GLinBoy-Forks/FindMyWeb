@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Icon } from "@iconify/vue";
+import { BatteryLevel } from "../lib/FindMyWeb";
 
 const isToggled = ref(false);
 
@@ -8,7 +9,43 @@ async function toggle(state: boolean) {
     isToggled.value = state;
 }
 
-const props = defineProps(["color", "name", "icon", "lastSeen", "active"]);
+const props = defineProps([
+    "color",
+    "name",
+    "icon",
+    "lastSeen",
+    "active",
+    "batteryLevel",
+]);
+
+function getBatteryIcon(): string {
+    switch (props.batteryLevel) {
+        case BatteryLevel.Full:
+            return "mdi:battery";
+        case BatteryLevel.Medium:
+            return "mdi:battery-60";
+        case BatteryLevel.Low:
+            return "mdi:battery-20";
+        case BatteryLevel.Critical:
+            return "mdi:battery-alert-variant-outline";
+    }
+    return "mdi:battery-remove-outline";
+}
+
+function getBatteryColor(): string {
+    switch (props.batteryLevel) {
+        case BatteryLevel.Full:
+            return "#198000";
+        case BatteryLevel.Medium:
+            return "#0a580b";
+        case BatteryLevel.Low:
+            return "#e9777f";
+        case BatteryLevel.Critical:
+            return "#ff0000";
+    }
+    return "#ffffff";
+}
+
 defineExpose({ toggle });
 
 const emit = defineEmits(["configure"]);
@@ -16,7 +53,7 @@ const emit = defineEmits(["configure"]);
 
 <template>
     <button
-        class="py-1.5 px-2 grid grid-cols-4 w-full gap-2 rounded-3xl shadow-2xl border-2 border-gray-900"
+        class="py-1.5 px-2 grid grid-cols-5 w-full gap-2 rounded-3xl shadow-2xl border-2 border-gray-900"
         :class="[
             isToggled
                 ? 'bg-gray-900 hover:bg-gray-900/80'
@@ -43,7 +80,16 @@ const emit = defineEmits(["configure"]);
             {{ props.lastSeen }}
         </p>
         <Icon
-            class="size-9 col-start-4 col-end-4 self-center rounded-2xl ml-auto p-1.5 hover:bg-gray-800 block cursor-pointer"
+            :rotate="3"
+            :horizontal-flip="true"
+            :class="[!active ? 'opacity-55' : '']"
+            class="size-9 col-start-4 col-end-4 self-center ml-auto mr-auto"
+            :icon="getBatteryIcon()"
+            :color="getBatteryColor()"
+        />
+
+        <Icon
+            class="size-9 col-start-5 col-end-5 self-center rounded-2xl ml-auto p-1.5 hover:bg-gray-800 block cursor-pointer"
             icon="mdi:cog-outline"
             :color="color"
             @click.stop="emit('configure')"

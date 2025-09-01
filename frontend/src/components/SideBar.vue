@@ -48,6 +48,7 @@ async function updateTags(allTags: Accessory[]) {
             color: tag.color,
             lastSeen: lastSeenStr,
             active: true ? locationResp.location : false,
+            batteryLevel: locationResp.location?.battery_level,
         });
     }
     tags.value = newTags;
@@ -102,6 +103,7 @@ defineExpose({ updateSidebar, updateTags });
                     :icon="tag.icon"
                     :color="tag.color"
                     :last-seen="tag.lastSeen"
+                    :battery-level="tag.batteryLevel"
                     :active="tag.active"
                     :key="tag.name"
                 />
