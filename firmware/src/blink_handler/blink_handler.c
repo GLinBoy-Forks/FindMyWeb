@@ -1,9 +1,9 @@
+#include "blink_handler.h"
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 
 #if DT_HAS_ALIAS(led0)
-#include "blink_handler.h"
 
 #define LED0_NODE DT_ALIAS(led0)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);

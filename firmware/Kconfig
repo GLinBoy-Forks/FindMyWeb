@@ -7,6 +7,7 @@ mainmenu "FruityTag"
 config NRF52_ADAFRUIT_BOOTLOADER
 	bool "Enable flashing through adafruit-nrfutil"
 	depends on SOC_SERIES_NRF52X
+	select RETAINED_MEM
 	default y if (!BOARD_HAS_NRF5_BOOTLOADER && BUILD_OUTPUT_UF2)
 	help
 	    Device must use Adafruit nRF52 Bootloader as a bootloader
