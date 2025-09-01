@@ -17,7 +17,7 @@ typedef struct __attribute__((__packed__)) {
 } tag_advertisement;
 
 typedef enum {
-  TAG_BATT_FULL = 0b00010000,
+  TAG_BATT_FULL = 0b00000000,
   TAG_BATT_MEDIUM = 0b01000000,
   TAG_BATT_LOW = 0b10000000,
   TAG_BATT_CRITICAL = 0b11000000,
