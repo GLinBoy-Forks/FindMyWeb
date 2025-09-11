@@ -1,4 +1,5 @@
 #include "battery_thread.h"
+#include "fruitytag/fruitytag.h"
 #include <zephyr/devicetree.h>
 
 #if DT_HAS_ALIAS(fuel_gauge0)
@@ -38,7 +39,7 @@ void battery_thread(void* tag_data, void*, void*) {
       return;
     };
     bt_bas_set_battery_level(batt_val.relative_state_of_charge);
-    fruitytag_update(tag, NULL, -1, batt_val.relative_state_of_charge);
+    fruitytag_update_battery(tag, batt_val.relative_state_of_charge);
 #ifdef CONFIG_PM_DEVICE
     pm_device_runtime_put(fuel_gauge);
 #endif

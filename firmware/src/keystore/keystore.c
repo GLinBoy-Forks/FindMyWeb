@@ -17,11 +17,11 @@ static const char pubkey_store_name[] = "keystore/pubkey";
 K_MUTEX_DEFINE(public_key_mutex);
 
 static uint8_t public_key[KEYSTORE_PUBKEY_SIZE];
-static bool key_set = false;
+static bool key_is_set = false;
 
 static void keystore_clear_pubkey() {
   memset(public_key, 0, KEYSTORE_PUBKEY_SIZE);
-  key_set = false;
+  key_is_set = false;
 }
 
 static int keystore_settings_set(const char* name, size_t len, settings_read_cb read_cb, void* cb_arg) {
@@ -45,7 +45,7 @@ static int keystore_settings_set(const char* name, size_t len, settings_read_cb 
 
     if (rc >= 0) {
       LOG_HEXDUMP_DBG(public_key, len, "Found public key:");
-      key_set = true;
+      key_is_set = true;
       k_mutex_unlock(&public_key_mutex);
       return 0;
     }
@@ -86,19 +86,17 @@ int keystore_set_pubkey(uint8_t* new_pub_key, size_t len) {
     return -EINVAL;
   }
 
-  err = settings_save_one(pubkey_store_name, new_pub_key, KEYSTORE_PUBKEY_SIZE);
-  if (err) {
-    LOG_ERR("Cannot save settings: %d", err);
-    return err;
-  }
-
   err = k_mutex_lock(&public_key_mutex, K_MSEC(100));
   if (err) {
     LOG_ERR("Couldn't lock mutex: %d", err);
     return err;
   }
 
-  keystore_clear_pubkey();
+  err = settings_save_one(pubkey_store_name, new_pub_key, KEYSTORE_PUBKEY_SIZE);
+  if (err) {
+    LOG_ERR("Cannot save settings: %d", err);
+    return err;
+  }
 
   memcpy(public_key, new_pub_key, KEYSTORE_PUBKEY_SIZE);
   k_mutex_unlock(&public_key_mutex);
@@ -118,9 +116,8 @@ int keystore_get_pubkey(uint8_t* pub_key, size_t len) {
     LOG_ERR("Couldn't lock mutex: %d", err);
     return err;
   }
-  k_mutex_unlock(&public_key_mutex);
 
-  if (!key_set) {
+  if (!key_is_set) {
 
     keystore_clear_pubkey();
 
@@ -139,7 +136,7 @@ int keystore_get_pubkey(uint8_t* pub_key, size_t len) {
 
       return -ENOENT;
     }
-    key_set = true;
+    key_is_set = true;
   }
 
   memcpy(pub_key, public_key, KEYSTORE_PUBKEY_SIZE);

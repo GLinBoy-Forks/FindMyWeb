@@ -64,7 +64,7 @@ int main(void) {
     goto blink_and_exit;
   }
 
-  err = fruitytag_update(&tag, pub_key, KEYSTORE_PUBKEY_SIZE, 100);
+  err = fruitytag_update_pubkey(&tag, pub_key, KEYSTORE_PUBKEY_SIZE);
   if (err) {
     LOG_ERR("Couldn't update fruity tag: %d", err);
     goto blink_and_exit;

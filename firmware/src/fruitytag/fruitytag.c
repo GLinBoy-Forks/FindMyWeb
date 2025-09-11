@@ -68,23 +68,7 @@ int fruitytag_start(fruity_tag* tag, bool restart) {
   return err;
 }
 
-int fruitytag_update(fruity_tag* tag, uint8_t* public_key, ssize_t public_key_len, int8_t battery_percent) {
-  int err = 0;
-
-  if (public_key || public_key_len > 0) {
-    err = tag_set_public_key(&tag->adv, public_key, public_key_len);
-    if (err) {
-      LOG_ERR("Couldn't set public key: %d", err);
-      return err;
-    }
-
-    err = tag_bt_address(tag->bt_address, sizeof(tag->bt_address), public_key, public_key_len, tag->bt_address_rev);
-    if (err) {
-      LOG_ERR("Couldn't get bt address: %d", err);
-      return err;
-    }
-  }
-
+int fruitytag_update_battery(fruity_tag* tag, uint8_t battery_percent) {
   if (0 <= battery_percent && battery_percent <= 10) {
     tag->adv.state = TAG_BATT_CRITICAL;
   } else if (10 < battery_percent && battery_percent <= 25) {
@@ -93,6 +77,22 @@ int fruitytag_update(fruity_tag* tag, uint8_t* public_key, ssize_t public_key_le
     tag->adv.state = TAG_BATT_MEDIUM;
   } else if (battery_percent > 75) {
     tag->adv.state = TAG_BATT_FULL;
+  }
+  return 0;
+}
+
+int fruitytag_update_pubkey(fruity_tag* tag, uint8_t* public_key, ssize_t public_key_len) {
+  int err = 0;
+  err = tag_set_public_key(&tag->adv, public_key, public_key_len);
+  if (err) {
+    LOG_ERR("Couldn't set public key: %d", err);
+    return err;
+  }
+
+  err = tag_bt_address(tag->bt_address, sizeof(tag->bt_address), public_key, public_key_len, tag->bt_address_rev);
+  if (err) {
+    LOG_ERR("Couldn't get bt address: %d", err);
+    return err;
   }
 
   return err;
