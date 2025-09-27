@@ -5,7 +5,7 @@ import random
 import re
 
 from findmy import KeyPair
-from findmy.reports import AsyncAppleAccount, RemoteAnisetteProvider
+from findmy.reports import AsyncAppleAccount, LocalAnisetteProvider
 
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
@@ -22,9 +22,9 @@ class FindMy:
     UPDATE_INTERVAL_MAX = 80
 
     def __init__(self):
-        self.anisette = RemoteAnisetteProvider(CONFIG.findmy.anisette)
-        self.account = AsyncAppleAccount(anisette=self.anisette)
-        self.account.from_json(CONFIG.findmy.account)
+        self.account = AsyncAppleAccount.from_json(
+            CONFIG.findmy.account, anisette_libs_path=CONFIG.findmy.libs_path
+        )
         self.update_task = None
         self.db = Database()
 
@@ -51,43 +51,52 @@ class FindMy:
             )
             await self._refetch_reports(hours=hours)
 
-    async def _refetch_reports(self, hours: int = 7 * 24):
+    async def _refetch_reports(self):
         for user in await self.db.get_users():
             accessories = await self.db.get_accessories_by_user(user=user)
-            for accessory in accessories:
-                locations = await self._fetch_locations(accessory, hours=hours)
-                for location in locations:
+            locations = await self._fetch_locations(accessories)
+            for accessory_key in locations:
+                for location in locations[accessory_key]:
                     try:
                         await self.db.add_location(location)
                     except LocationExists:
                         pass
 
     async def _fetch_locations(
-        self, accessory: Accessory, hours: int = 7 * 24
-    ) -> list[Location]:
-        key_pair = KeyPair.from_b64(accessory.private_key)
+        self, accessories: list[Accessory]
+    ) -> dict[str, list[Location]]:
+        key_pair_map = dict()
+        for accessory in accessories:
+            key_pair = KeyPair.from_b64(accessory.private_key)
+            key_pair_map[key_pair] = accessory
 
-        reports = await self.account.fetch_last_reports(keys=key_pair, hours=hours)
-
-        return [
-            Location(
-                id=await self._hash_report(
-                    accessory.private_key,
-                    report.latitude,
-                    report.longitude,
-                    report.timestamp,
-                ),
-                lat=report.latitude,
-                lon=report.longitude,
-                timestamp=report.timestamp.astimezone(tz=datetime.timezone.utc),
-                battery_level=BatteryLevel.from_status(report.status),
-                status=report.status,
-                confidence=report.confidence,
-                horizontal_accuracy=report.horizontal_accuracy,
-                accessory_key=accessory.private_key,
-            )
-            for report in reports
-        ]
+        location_histories = await self.account.fetch_location_history(
+            keys=list(key_pair_map.keys())
+        )
+        accessory_location_map = dict()
+        for key_pair in location_histories:
+            accessory = key_pair_map[key_pair]
+            reports = location_histories[key_pair]
+            accessory_location_map[accessory.private_key] = [
+                Location(
+                    id=await self._hash_report(
+                        accessory.private_key,
+                        report.latitude,
+                        report.longitude,
+                        report.timestamp,
+                    ),
+                    lat=report.latitude,
+                    lon=report.longitude,
+                    timestamp=report.timestamp.astimezone(tz=datetime.timezone.utc),
+                    battery_level=BatteryLevel.from_status(report.status),
+                    status=report.status,
+                    confidence=report.confidence,
+                    horizontal_accuracy=report.horizontal_accuracy,
+                    accessory_key=accessory.private_key,
+                )
+                for report in reports
+            ]
+        return accessory_location_map
 
     async def setup(self) -> None:
         await self.db.setup()

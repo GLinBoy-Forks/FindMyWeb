@@ -1,5 +1,5 @@
 fastapi>=0.115.14
-findmy>=0.8.0
+findmy>=0.9.0
 isort>=6.0.1
 pyargon2>=1.1.2
 PyJWT>=2.10.1

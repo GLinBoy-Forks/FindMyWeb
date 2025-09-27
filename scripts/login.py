@@ -7,7 +7,7 @@ from findmy.reports import (
     LoginState,
     SmsSecondFactorMethod,
     TrustedDeviceSecondFactorMethod,
-    RemoteAnisetteProvider,
+    LocalAnisetteProvider,
 )
 import asyncio
 import sys
@@ -43,30 +43,32 @@ async def _login_async(account: AsyncAppleAccount) -> None:
         await method.submit(code)
 
 
-async def get_account_async(anisette: BaseAnisetteProvider) -> AsyncAppleAccount:
+async def get_account_async(libs_path: str) -> AsyncAppleAccount:
     """Tries to restore a saved Apple account, or prompts the user for login otherwise. (async)"""
-    acc = AsyncAppleAccount(anisette=anisette)
-    acc_store = ACCOUNT_STORE
     try:
-        acc.from_json(acc_store)
-    except FileNotFoundError:
+        acc_store = ACCOUNT_STORE
+        acc = AsyncAppleAccount.from_json(acc_store, anisette_libs_path=libs_path)
+    except (FileNotFoundError, KeyError):
+        anisette = LocalAnisetteProvider(libs_path=libs_path)
+        acc = AsyncAppleAccount(anisette=anisette)
         await _login_async(acc)
         acc.to_json(acc_store)
 
     return acc
 
 
-async def main(b64_adv_key: str):
+async def main(libs_path: str, b64_adv_key: str):
     key_pair = KeyPair.from_b64(b64_adv_key)
-    anisette = RemoteAnisetteProvider(ANISETTE_SERVER)
-    acc = await get_account_async(anisette)
+
+    acc = await get_account_async(libs_path)
     while True:
         try:
-            reports = await acc.fetch_last_reports(key_pair)
+            reports = await acc.fetch_location(key_pair)
             print(reports)
             break
         except UnauthorizedError:
             await acc.close()
+            anisette = LocalAnisetteProvider(libs_path=libs_path)
             acc = AsyncAppleAccount(anisette=anisette)
             await _login_async(acc)
             acc.to_json(ACCOUNT_STORE)
@@ -74,4 +76,4 @@ async def main(b64_adv_key: str):
 
 
 if __name__ == "__main__":
-    asyncio.run(main(sys.argv[1]))
+    asyncio.run(main(sys.argv[1], sys.argv[2]))

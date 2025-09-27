@@ -18,7 +18,7 @@ class AdminConfig(BaseModel):
 
 
 class FindMyConfig(BaseModel):
-    anisette: str
+    libs_path: str
     account: str
 
 
