@@ -1,9 +1,7 @@
 from findmy import KeyPair
 from findmy.errors import UnauthorizedError
 from findmy.reports import (
-    AppleAccount,
     AsyncAppleAccount,
-    BaseAnisetteProvider,
     LoginState,
     SmsSecondFactorMethod,
     TrustedDeviceSecondFactorMethod,
@@ -13,7 +11,6 @@ import asyncio
 import sys
 
 ACCOUNT_STORE = "account.json"
-ANISETTE_SERVER = "http://localhost:6969"
 
 
 async def _login_async(account: AsyncAppleAccount) -> None:
