@@ -93,7 +93,7 @@ async function getHtmlForLocation(header: string, name: string, location: Locati
   </h1>
   <p>(${location.lat} ${location.lon})</p>
   <p>Battery: ${location.battery_level != null ? BatteryLevel[location.battery_level] : 'Not Found'}</p>
-  <p>Accuracy: ${location.horizontal_accuracy != null ? location.horizontal_accuracy : 'Not Found'}m</p>
+  <p>Accuracy: ${location.horizontal_accuracy != null ? `${location.horizontal_accuracy}m` : 'Not Found'}</p>
   <p>
     <u>
       <a href=${await geoUri(name, location)}>geo URI</a>
