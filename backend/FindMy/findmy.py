@@ -6,6 +6,7 @@ import re
 
 from findmy import KeyPair
 from findmy.reports import AsyncAppleAccount, LocalAnisetteProvider
+from findmy.errors import UnhandledProtocolError
 
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
@@ -55,6 +56,9 @@ class FindMy:
         for user in await self.db.get_users():
             accessories = await self.db.get_accessories_by_user(user=user)
             locations = await self._fetch_locations(accessories)
+            if not locations:
+                continue
+
             for accessory_key in locations:
                 for location in locations[accessory_key]:
                     try:
@@ -64,15 +68,27 @@ class FindMy:
 
     async def _fetch_locations(
         self, accessories: list[Accessory]
-    ) -> dict[str, list[Location]]:
+    ) -> dict[str, list[Location]] | None:
         key_pair_map = dict()
         for accessory in accessories:
             key_pair = KeyPair.from_b64(accessory.private_key)
             key_pair_map[key_pair] = accessory
 
-        location_histories = await self.account.fetch_location_history(
-            keys=list(key_pair_map.keys())
-        )
+        location_histories = None
+
+        for i in range(5):
+            try:
+                location_histories = await self.account.fetch_location_history(
+                    keys=list(key_pair_map.keys())
+                )
+                break
+            except UnhandledProtocolError:  # TODO: Occurs sometimes
+                await asyncio.sleep(
+                    random.randint(100, 500) / 1000
+                )  # Random time between 100ms and 500ms
+        if not location_histories:
+            return None
+
         accessory_location_map = dict()
         for key_pair in location_histories:
             accessory = key_pair_map[key_pair]
