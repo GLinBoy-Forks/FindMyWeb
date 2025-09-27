@@ -50,7 +50,7 @@ class FindMy:
             await asyncio.sleep(
                 random.randint(self.UPDATE_INTERVAL_MAX, self.UPDATE_INTERVAL_MAX)
             )
-            await self._refetch_reports(hours=hours)
+            await self._refetch_reports()
 
     async def _refetch_reports(self):
         for user in await self.db.get_users():
