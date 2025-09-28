@@ -320,7 +320,14 @@ async def get_users(current_user: Annotated[User, Depends(get_current_active_use
     all_users = await findmy.db.get_users()
 
     return UsersResponse(
-        users=[UserInfo(name=user.username, is_admin=user.admin) for user in all_users]
+        users=[
+            UserInfo(
+                name=user.username,
+                is_admin=user.admin,
+                superuser=CONFIG.admin.name == user.username,
+            )
+            for user in all_users
+        ]
     )
 
 

@@ -71,6 +71,8 @@ onMounted(async () => {
                     @configure="configureUser(index)"
                     v-for="(user, index) in users"
                     :name="user.name"
+                    :superuser="user.superuser"
+                    :admin="user.is_admin"
                     :key="index"
                 />
                 <button

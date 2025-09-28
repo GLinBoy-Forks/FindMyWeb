@@ -89,6 +89,7 @@ class PrivateKeyResponse(BaseModel):
 
 class UserInfo(BaseModel):
     name: str
+    superuser: bool
     is_admin: bool
 
 

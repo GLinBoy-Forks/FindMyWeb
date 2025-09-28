@@ -94,6 +94,7 @@ export class PrivateKeyResponse {
 export class UserInfo {
   name?: string;
   is_admin?: boolean;
+  superuser?: boolean;
 }
 
 export class UsersResponse {
