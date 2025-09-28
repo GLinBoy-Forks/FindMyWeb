@@ -102,9 +102,11 @@ export class UsersResponse {
 
 export default class FindMyWeb {
   private baseUrl: string;
+  private tokenRefresh: boolean;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
+    this.tokenRefresh = false;
   }
 
   async _parseJwt(token: string) {
@@ -229,6 +231,10 @@ export default class FindMyWeb {
   }
 
   async getToken(): Promise<string> {
+    while (this.tokenRefresh) {
+      await new Promise((f) => setTimeout(f, 10));
+    }
+
     let token = localStorage.getItem("token");
     if (token == null) {
       throw new Error("Token was not found in local storage");
@@ -237,9 +243,25 @@ export default class FindMyWeb {
   }
 
   async refreshToken() {
-    const responseJSON = await this._get<any>("refresh", false);
-    const token = responseJSON["access_token"];
-    await this.setToken(token);
+    if (this.tokenRefresh) {
+      return;
+    }
+
+    this.tokenRefresh = true;
+    try {
+      const response = await fetch(`${this.baseUrl}/refresh`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const responseJSON = await response.json();
+      const token = responseJSON["access_token"];
+      await this.setToken(token);
+    } finally {
+      this.tokenRefresh = false;
+    }
   }
 
   async login(username: string, password: string): Promise<any> {
