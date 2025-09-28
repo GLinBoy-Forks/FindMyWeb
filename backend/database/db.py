@@ -20,7 +20,7 @@ class Database:
         self.engine = create_engine(CONFIG.db.uri)
         SQLModel.metadata.create_all(self.engine)
 
-    async def _encrypt_pwd(self, password: str) -> str:
+    async def _hash_pwd(self, password: str) -> str:
         return hash(password, CONFIG.jwt.secret)
 
     async def _location_exists(self, location: Location) -> bool:
@@ -141,7 +141,7 @@ class Database:
 
         new_user = User(
             username=username,
-            password_hash=await self._encrypt_pwd(password=password),
+            password_hash=await self._hash_pwd(password=password),
             admin=is_admin,
         )
         with Session(self.engine) as session:
@@ -204,7 +204,7 @@ class Database:
         return user
 
     async def update_password(self, user: User, new_password: str) -> User:
-        user.password_hash = await self._encrypt_pwd(new_password)
+        user.password_hash = await self._hash_pwd(new_password)
         with Session(self.engine) as session:
             session.add(user)
             session.commit()
@@ -227,6 +227,6 @@ class Database:
             session.commit()
 
     async def verify(self, user: User, password: str) -> bool:
-        pwd_hash = await self._encrypt_pwd(password=password)
+        pwd_hash = await self._hash_pwd(password=password)
 
         return pwd_hash == user.password_hash
