@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { ref, useTemplateRef, defineAsyncComponent } from "vue";
+import Error from "./Error.vue";
+import Loading from "./Loading.vue";
 import { Icon } from "@iconify/vue";
 
-import SidebarEntry from "./SidebarEntry.vue";
+const SidebarEntry = defineAsyncComponent({
+    loader: () => import("./SidebarEntry.vue"),
+    loadingComponent: Loading,
+    delay: 200,
+    errorComponent: Error,
+    timeout: 3000,
+});
+
 import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
 

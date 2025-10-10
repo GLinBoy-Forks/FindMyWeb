@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
-import { locationDate } from "../lib/helpers.ts";
-
-import Map from "../components/Map.vue";
-import SideBar from "../components/SideBar.vue";
-import Header from "../components/Header.vue";
-import AccessoryConfig from "./AccessoryConfig.vue";
-
 import {
     onMounted,
     onBeforeUnmount,
@@ -14,7 +6,39 @@ import {
     onActivated,
     ref,
     useTemplateRef,
+    defineAsyncComponent,
 } from "vue";
+import Error from "../components/Error.vue";
+import Loading from "../components/Loading.vue";
+import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
+import { locationDate } from "../lib/helpers.ts";
+
+const Map = defineAsyncComponent({
+    loader: () => import("../components/Map.vue"),
+    loadingComponent: Loading,
+    delay: 200,
+    errorComponent: Error,
+    timeout: 8000,
+});
+
+const SideBar = defineAsyncComponent({
+    loader: () => import("../components/SideBar.vue"),
+    loadingComponent: Loading,
+    delay: 200,
+    errorComponent: Error,
+    timeout: 3000,
+});
+
+const AccessoryConfig = defineAsyncComponent({
+    loader: () => import("./AccessoryConfig.vue"),
+    loadingComponent: Loading,
+    delay: 200,
+    errorComponent: Error,
+    timeout: 3000,
+});
+
+import Header from "../components/Header.vue";
+
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -181,8 +205,8 @@ async function stopInterval() {
 }
 
 async function init() {
-    if (!map || !map.value) {
-        return;
+    while (!map || !map.value) {
+        await new Promise((res) => setTimeout(res, 100));
     }
 
     await reloadAndShow();
