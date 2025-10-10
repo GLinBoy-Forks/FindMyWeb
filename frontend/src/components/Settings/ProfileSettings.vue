@@ -52,7 +52,7 @@ async function changePassword() {
                     class="mt-1 w-full rounded-md border-gray-200 bg-slate-500 text-m text-gray-100 shadow-sm p-2"
                 />
                 <div class="flex justify-end">
-                    <button class="mt-6" @click="changePassword">
+                    <button class="mt-6 cursor-pointer" @click="changePassword">
                         <p
                             class="text-2xl text-white font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 shadow-md shadow-gray-900 ring-2 ring-blue-800"
                         >
