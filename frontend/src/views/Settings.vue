@@ -75,7 +75,10 @@ onUpdated(async () => {
 <template>
     <div class="flex flex-col h-dvh">
         <div class="h-12 bg-amber-600 flex content-start w-full">
-            <button class="size-10" @click="router.push({ name: 'Dashboard' })">
+            <button
+                class="size-10 cursor-pointer"
+                @click="router.push({ name: 'Dashboard' })"
+            >
                 <Icon
                     class="size-full text-gray-800 align-middle"
                     icon="mdi:arrow-back"
