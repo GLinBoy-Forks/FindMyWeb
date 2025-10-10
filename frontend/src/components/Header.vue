@@ -40,7 +40,7 @@ defineExpose({ setDateRange, hideDatePicker });
 <template>
     <div class="h-12 bg-amber-600 flex content-start w-full">
         <button
-            class="size-10 justify-start flex-none"
+            class="size-10 justify-start flex-none cursor-pointer"
             @click="onSidebarButton()"
         >
             <Icon
@@ -65,7 +65,7 @@ defineExpose({ setDateRange, hideDatePicker });
             @click="emit('openSettings')"
         >
             <Icon
-                class="size-full text-gray-800 align-middle"
+                class="size-full text-gray-800 align-middle cursor-pointer"
                 icon="mdi:cog-outline"
             />
         </button>
