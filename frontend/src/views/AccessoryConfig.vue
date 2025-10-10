@@ -120,15 +120,15 @@ onMounted(async () => {
         <div class="md:p-8 p-10 ml-4 mr-4 rounded-lg shadow-black shadow-2xl w-full md:w-[80%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] bg-gray-800 flex flex-col ring-4 ring-gray-900">
             <div v-if="!showIconSelector">
                 <div v-if="props.accessoryToConfigure">
-                    <Icon @click="deleteAccessory" class="mr-auto text-red-400 bg-gray-700 hover:bg-gray-900 rounded-2xl p-2 size-12 mb-4" icon="mdi:trash-can"/>
+                    <Icon @click="deleteAccessory" class="mr-auto text-red-400 bg-gray-700 hover:bg-gray-900 rounded-2xl p-2 size-12 mb-4 cursor-pointer" icon="mdi:trash-can"/>
                 </div>
                 <div  class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-5">
 
                     <label class="text-white text-lg md:text-xl font-bold" for="icon">Icon:</label>
-                    <Icon id="selectedIcon" class="text-white ml-auto size-10" @click="showIconSelector=true" :icon="selectedIcon" />
+                    <Icon id="selectedIcon" class="text-white ml-auto size-10 cursor-pointer" @click="showIconSelector=true" :icon="selectedIcon" />
 
                     <label class="text-white text-lg md:text-xl font-bold" for="color">Color:</label>
-                    <input v-model="selectedColor" class="text-white rounded-sm bg-gray-500 ml-auto" name="color" type="color">
+                    <input v-model="selectedColor" class="text-white rounded-sm bg-gray-500 ml-auto cursor-pointer" name="color" type="color">
 
                     <label class="text-white text-lg md:text-xl font-bold" for="name">Name:</label>
                     <input v-model="accessoryName" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="name" type="text">
@@ -139,7 +139,7 @@ onMounted(async () => {
                     <label v-if="advertisementKey.length > 0" class="text-white text-lg md:text-xl font-bold" for="advertisement_key">Advertisement Key:</label>
                     <input v-if="advertisementKey.length > 0" v-model="advertisementKey" :disabled="props.accessoryToConfigure" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="advertisement_key" type="text">
 
-                    <button class="mr-auto mt-6" @click="emit('cancel')">
+                    <button class="mr-auto mt-6 cursor-pointer" @click="emit('cancel')">
                         <p class="text-2xl text-white font-bold bg-gray-500 hover:bg-gray-700 rounded-lg px-2 py-2 shadow-md shadow-gray-900">Cancel</p>
                     </button>
                     <div class="text-white relative shadow-md shadow-gray-900 ml-auto mt-6">
@@ -148,8 +148,8 @@ onMounted(async () => {
                             class="absolute size-full top-0 left-0"
                             icon="line-md:loading-loop"
                         />
-                        <button :disabled="isLoading" @click="save">
-                            <p class="text-2xl font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 ring-2 ring-blue-800" :class="isLoading ? 'opacity-20 ' : ''">Save</p>
+                        <button class="cursor-pointer" :disabled="isLoading" @click="save">
+                            <p class="text-2xl font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 ring-2 ring-blue-800" :class="isLoading ? 'opacity-20' : ''">Save</p>
                         </button>
                     </div>
                 </div>
