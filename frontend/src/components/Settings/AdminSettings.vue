@@ -77,7 +77,7 @@ onMounted(async () => {
                 />
                 <button
                     @click="configureUser(null)"
-                    class="my-5 py-1.5 px-1.5 w-full bg-gray-700 hover:bg-gray-800 rounded-3xl shadow-2xl border-2 border-gray-950"
+                    class="my-5 py-1.5 px-1.5 w-full bg-gray-700 hover:bg-gray-800 rounded-3xl shadow-2xl border-2 border-gray-950 cursor-pointer"
                 >
                     <Icon
                         class="size-10 mx-auto my-auto"
