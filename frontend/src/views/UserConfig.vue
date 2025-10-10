@@ -91,13 +91,13 @@ onMounted(async () => {
                     <input v-if="!isSelf" v-model="password" class="text-white rounded-sm bg-gray-500 px-2 w-full" name="password" type="password">
 
                     <label class="text-white text-lg md:text-xl font-bold" for="is_admin">Admin:</label>
-                    <input v-model="isAdmin" :disabled="isSelf" class="text-white rounded-sm bg-gray-500 px-2 ml-auto size-6" name="is_admin" type="checkbox">
+                    <input v-model="isAdmin" :disabled="isSelf" class="text-white rounded-sm bg-gray-500 px-2 ml-auto size-6 cursor-pointer" name="is_admin" type="checkbox">
 
-                    <button class="mr-auto mt-6" @click="emit('cancel')">
+                    <button class="mr-auto mt-6 cursor-pointer" @click="emit('cancel')">
                         <p class="text-2xl text-white font-bold bg-gray-500 hover:bg-gray-700 rounded-lg px-2 py-2 shadow-md shadow-gray-900">Cancel</p>
                     </button>
 
-                    <button class="ml-auto mt-6" @click="save">
+                    <button class="ml-auto mt-6 cursor-pointer" @click="save">
                         <p class="text-2xl text-white font-bold bg-blue-600 hover:bg-blue-800 rounded-lg px-2 py-2 shadow-md shadow-gray-900 ring-2 ring-blue-800">Save</p>
                     </button>
 
