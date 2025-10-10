@@ -20,7 +20,7 @@ defineExpose({ toggle, route: props.route_name });
 <template>
     <div
         @click="onToggle()"
-        class="flex flex-row gap-x-3 p-4 rounded-2xl"
+        class="flex flex-row gap-x-3 p-4 rounded-2xl cursor-pointer"
         :class="[isToggled ? 'bg-gray-900' : 'hover:bg-gray-800']"
     >
         <Icon class="size-10" :icon="props.icon" />
