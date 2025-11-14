@@ -75,7 +75,7 @@ async function login() {
                                     name="submit"
                                     v-on:click="login()"
                                     value="Login"
-                                    class="w-full h-full"
+                                    class="w-full h-full cursor-pointer"
                                     :class="isLoading ? 'opacity-50' : ''"
                                 />
                                 <Icon
