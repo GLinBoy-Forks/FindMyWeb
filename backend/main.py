@@ -102,6 +102,12 @@ async def get_current_active_user(
     return current_user
 
 
+async def ensure_is_admin(current_user: Annotated[User, Depends(get_current_user)]):
+    if not current_user.admin:
+        raise USER_NOT_PERMITTED_EXCEPTION
+    return current_user
+
+
 @api.post("/login")
 async def login(
     response: Response, login_data: Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -313,10 +319,7 @@ async def change_password(
 
 
 @api.get("/users")
-async def get_users(current_user: Annotated[User, Depends(get_current_active_user)]):
-    if not current_user.admin:
-        raise USER_NOT_PERMITTED_EXCEPTION
-
+async def get_users(current_user: Annotated[User, Depends(ensure_is_admin)]):
     all_users = await findmy.db.get_users()
 
     return UsersResponse(
@@ -333,12 +336,9 @@ async def get_users(current_user: Annotated[User, Depends(get_current_active_use
 
 @api.post("/user/create", status_code=status.HTTP_200_OK)
 async def create_user(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(ensure_is_admin)],
     create_user_req: CreateUserRequest,
 ):
-    if not current_user.admin:
-        raise USER_NOT_PERMITTED_EXCEPTION
-
     try:
         await findmy.db.add_user(
             username=create_user_req.name,
@@ -353,12 +353,9 @@ async def create_user(
 
 @api.post("/user/remove", status_code=status.HTTP_200_OK)
 async def remove_user(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(ensure_is_admin)],
     remove_user_req: RemoveUserRequest,
 ):
-    if not current_user.admin:
-        raise USER_NOT_PERMITTED_EXCEPTION
-
     if current_user.username == remove_user_req.name:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Can't remove yourself"
@@ -374,12 +371,9 @@ async def remove_user(
 
 @api.post("/user/update", status_code=status.HTTP_200_OK)
 async def update_user(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(ensure_is_admin)],
     update_user_req: UpdateUserRequest,
 ):
-    if not current_user.admin:
-        raise USER_NOT_PERMITTED_EXCEPTION
-
     if current_user.username == update_user_req.name:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Can't update yourself"
