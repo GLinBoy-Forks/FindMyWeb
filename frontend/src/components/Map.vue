@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, useTemplateRef } from "vue";
 
-import { Accessory, Location, BatteryLevel } from "../lib/FindMyWeb.ts";
+import FindMyWeb, { Accessory, Location, BasicLocation, BatteryLevel } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -10,6 +10,7 @@ import maplibregl from "maplibre-gl";
 import { loadIcon } from "@iconify/vue";
 
 const mapdiv = useTemplateRef("mapdiv");
+const FindMyWebAPI = new FindMyWeb();
 
 let map: maplibregl.Map | null;
 let markers: maplibregl.Marker[] = [];
@@ -245,7 +246,7 @@ async function addLine(coordinates: number[][], color: string, name: string) {
 
 }
 
-async function addPreviousMarkers(locations: Location[], color: string, accessory_name: string, name: string) {
+async function addPreviousMarkers(locations: BasicLocation[], color: string, accessory_name: string, name: string) {
   if(!map) {
     return;
   }
@@ -287,7 +288,9 @@ async function addPreviousMarkers(locations: Location[], color: string, accessor
     // @ts-ignore: Typing geoJSON is a terrible idea
     point.properties["date"] = location_text;
     // @ts-ignore: Typing geoJSON is a terrible idea
-    point.properties["description"] = await getHtmlForLocation("Previous", accessory_name, location)
+    point.properties["location_id"] = location.id;
+    // @ts-ignore: Typing geoJSON is a terrible idea
+    point.properties["accessory_name"] = accessory_name;
     // @ts-ignore: Typing geoJSON is a terrible idea
     geoJSON.data.features.push(point);
   }
@@ -316,14 +319,17 @@ async function addPreviousMarkers(locations: Location[], color: string, accessor
       }
   });
 
-  map.on('click', name, (e) => {
+  map.on('click', name, async (e) => {
       if(!e.features || !map) {
         return;
       }
       // @ts-ignore: Typing geoJSON is a terrible idea
       const coordinates = e.features[0].geometry.coordinates.slice();
-      const description = e.features[0].properties.description;
+      const locationId = e.features[0].properties.location_id;
+      const accessoryName = e.features[0].properties.accessory_name;
 
+      const location = (await FindMyWebAPI.getLocation(accessoryName, locationId)).location;
+      const description = await getHtmlForLocation("Previous", accessoryName, location);
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.

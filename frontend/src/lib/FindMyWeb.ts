@@ -41,6 +41,13 @@ export class Location {
   accessory_key?: string;
 }
 
+export class BasicLocation {
+  id?: string;
+  lat?: number;
+  lon?: number;
+  timestamp?: string;
+}
+
 export class Accessory {
   private_key?: string;
   name?: string;
@@ -80,7 +87,7 @@ export class AdvertisementResponse {
 }
 
 export class LocationsResponse {
-  locations?: Location[];
+  locations?: BasicLocation[];
 }
 
 export class LocationResponse {
@@ -314,9 +321,13 @@ export default class FindMyWeb {
     });
   }
 
-  async getLocation(accessoryName: string): Promise<LocationResponse> {
+  async getLocation(
+    accessoryName: string,
+    locationId: string | undefined = undefined,
+  ): Promise<LocationResponse> {
     return await this._post<LocationResponse>(`location`, {
       name: accessoryName,
+      location_id: locationId,
     });
   }
 
