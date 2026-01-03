@@ -80,6 +80,8 @@ async function showMarkers() {
 
     await map.value.clear();
 
+    const coordinates = [];
+
     for (let i = 0; i < accessories.length; i++) {
         const accessory = accessories[i];
         if (!accessory.name) {
@@ -91,9 +93,14 @@ async function showMarkers() {
         if (!locationResp.location) {
             continue;
         }
+        coordinates.push([
+            locationResp.location.lon,
+            locationResp.location.lat,
+        ]);
 
         await map.value.showMarker(accessory, locationResp.location);
     }
+    await map.value.zoomToCoordinates(coordinates, 200);
 }
 
 async function onSelected(name: string | null) {

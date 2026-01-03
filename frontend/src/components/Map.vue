@@ -13,6 +13,7 @@ const mapdiv = useTemplateRef("mapdiv");
 const FindMyWebAPI = new FindMyWeb();
 
 let map: maplibregl.Map | null;
+let popups: maplibregl.Popup[] = [];
 let markers: maplibregl.Marker[] = [];
 
 const mapObserver = new ResizeObserver(() => {
@@ -143,7 +144,7 @@ async function init() {
 
 }
 
-async function zoomToCoordinates(lonLat: number[][]) {
+async function zoomToCoordinates(lonLat: number[][], padding: number = 50) {
   if(!map){
     return;
   }
@@ -158,8 +159,9 @@ async function zoomToCoordinates(lonLat: number[][]) {
       );
 
   map.fitBounds(bounds, {
-              padding: 50,
-          });
+      padding: padding
+    }
+  );
 }
 async function removeLayerAndSource(name: string) {
   if(!map) {
@@ -183,6 +185,11 @@ async function clear() {
   for (var i = 0; i < markers.length; i++) {
       markers[i].remove();
   }
+
+  for (var i = 0; i < popups.length; i++) {
+      popups[i].remove();
+  }
+  popups = [];
   markers = [];
 }
 
@@ -211,14 +218,14 @@ async function addLine(coordinates: number[][], color: string, name: string) {
   // @ts-ignore: Typing geoJSON is a terrible idea
   map.addSource(name, geoJSON);
   map.addLayer({
-      'id': name,
-      'type': 'line',
-      'source': name,
-      'layout': {
+      id: name,
+      type: 'line',
+      source: name,
+      layout: {
           'line-join': 'bevel',
           'line-cap': 'square',
       },
-      'paint': {
+      paint: {
           'line-color': color,
           'line-width': 3,
           'line-opacity': 0.3,
@@ -227,13 +234,13 @@ async function addLine(coordinates: number[][], color: string, name: string) {
 
 
   map.addLayer({
-    'id': 'directionArrows',
-    'type': 'symbol',
-    'source': name,
-    'paint': {
+    id: 'directionArrows',
+    type: 'symbol',
+    source: name,
+    paint: {
       'icon-color': color,
     },
-    'layout': {
+    layout: {
       'symbol-placement': 'line',
       'symbol-spacing': 1,
       'icon-allow-overlap': true,
@@ -260,15 +267,6 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
     }
   };
 
-  const pointFeature = {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "Point",
-      coordinates: []
-    },
-  };
-
   for (let i = 0; i < locations.length; i++ ) {
     let location = locations[i];
 
@@ -276,37 +274,40 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
       continue;
     }
 
-    let point = structuredClone(pointFeature);
-
     let location_text = "No timestamp";
 
     if (location.timestamp) {
       location_text = await locationDateString(location);
     }
-    // @ts-ignore: Typing geoJSON is a terrible idea
-    point.geometry.coordinates = [location.lon, location.lat];
-    // @ts-ignore: Typing geoJSON is a terrible idea
-    point.properties["date"] = location_text;
-    // @ts-ignore: Typing geoJSON is a terrible idea
-    point.properties["location_id"] = location.id;
-    // @ts-ignore: Typing geoJSON is a terrible idea
-    point.properties["accessory_name"] = accessory_name;
-    // @ts-ignore: Typing geoJSON is a terrible idea
+
+    const point = {
+      type: "Feature",
+      properties: {
+        'date': location_text,
+        'location_id': location.id,
+        'accessory_name': accessory_name
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [location.lon, location.lat]
+      },
+    };
+
     geoJSON.data.features.push(point);
   }
 
   // @ts-ignore: Typing geoJSON is a terrible idea
   map.addSource(name, geoJSON);
   map.addLayer({
-      'id': name,
-      'type': 'symbol',
-      'source': name,
-      'paint': {
+      id: name,
+      type: 'symbol',
+      source: name,
+      paint: {
         'icon-color': color,
         'text-halo-color': '#EEEEEE',
         'text-halo-width': 3,
       },
-      'layout': {
+      layout: {
           'icon-image': 'circle-outline',
           'icon-size': 0.25,
           'text-field': ['get', 'date'],
@@ -318,7 +319,6 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
           'text-anchor': 'top'
       }
   });
-
   map.on('click', name, async (e) => {
       if(!e.features || !map) {
         return;
@@ -337,10 +337,11 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      new maplibregl.Popup()
+      popups.push(new maplibregl.Popup()
           .setLngLat(coordinates)
           .setHTML(description)
-          .addTo(map);
+          .addTo(map)
+      );
   });
 }
 
@@ -361,7 +362,7 @@ async function showMarker(accessory: Accessory, location: Location) {
   element.onclick = async (event) => {
     event.stopPropagation();
     // @ts-ignore: Properties of Accessory are always defined
-    new maplibregl.Popup({ offset: 25 }).setHTML(await getHtmlForLocation("Current", accessory.name, location)).setLngLat([location.lon, location.lat]).addTo(map);
+    popups.push(new maplibregl.Popup({ offset: 25 }).setHTML(await getHtmlForLocation("Current", accessory.name, location)).setLngLat([location.lon, location.lat]).addTo(map));
   };
 
   element.innerHTML = iconData.body;
@@ -414,7 +415,7 @@ async function waitLoaded() {
     }
 }
 
-defineExpose({ showTrace, showMarker, clear });
+defineExpose({ showTrace, showMarker, zoomToCoordinates, clear });
 
 
 onMounted(async () => {
