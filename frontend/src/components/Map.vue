@@ -374,7 +374,7 @@ async function showMarker(accessory: Accessory, location: Location) {
   markers.push(marker);
 }
 
-async function showTrace(accessory: Accessory, locations: Location[]) {
+async function showTrace(accessory: Accessory, locations: BasicLocation[]) {
   await clear();
 
   if(!locations || locations.length == 0 || !accessory.color || !accessory.name || !map) {
@@ -390,8 +390,8 @@ async function showTrace(accessory: Accessory, locations: Location[]) {
     coordinates.push([location.lon, location.lat]);
   }
 
-
-  const lastLocation = locations.splice(0, 1)[0];
+  const lastLocationId = locations.splice(0, 1)[0].id;
+  const lastLocation = (await FindMyWebAPI.getLocation(accessory.name, lastLocationId)).location;
 
   // @ts-ignore: Typing geoJSON is a terrible idea
   await addLine(coordinates, accessory.color, 'trace');

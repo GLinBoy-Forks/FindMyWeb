@@ -1,8 +1,8 @@
 import datetime
-
-from pydantic import BaseModel
+import uuid
 
 from database.models import Accessory, Location
+from pydantic import BaseModel
 
 
 class CreateAccessoryRequest(BaseModel):
@@ -38,7 +38,7 @@ class LocationsRequest(AccessoryBaseRequest):
 
 
 class LocationRequest(AccessoryBaseRequest):
-    pass
+    location_id: str | None = None
 
 
 class AccessoryRequest(AccessoryBaseRequest):
@@ -75,8 +75,24 @@ class AccessoryResponse(BaseModel):
     accessory: Accessory
 
 
+class BasicLocation(BaseModel):
+    id: str
+    lat: float
+    lon: float
+    timestamp: datetime.datetime
+
+    @staticmethod
+    def from_location(location: Location):
+        return BasicLocation(
+            id=location.id,
+            lat=location.lat,
+            lon=location.lon,
+            timestamp=location.timestamp,
+        )
+
+
 class LocationsResponse(BaseModel):
-    locations: list[Location]
+    locations: list[BasicLocation]
 
 
 class LocationResponse(BaseModel):

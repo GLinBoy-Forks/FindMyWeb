@@ -2,11 +2,9 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 import jwt
+from const import CONFIG
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from jwt.exceptions import InvalidTokenError
-
-from const import CONFIG
 
 CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -16,6 +14,10 @@ CREDENTIALS_EXCEPTION = HTTPException(
 
 ACCESSORY_NOT_FOUND_EXCEPTION = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
+)
+
+LOCATION_NOT_FOUND_EXCEPTION = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Location not found"
 )
 
 USER_NOT_FOUND_EXCEPTION = HTTPException(
