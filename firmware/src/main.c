@@ -58,7 +58,7 @@ int main(void) {
     goto blink_and_exit;
   }
 
-  err = fruitytag_init(&tag, CONFIG_FRUITYTAG_ADVERTISEMENT_INTERVAL, true);
+  err = fruitytag_init(&tag, CONFIG_FRUITYTAG_ADVERTISEMENT_INTERVAL);
   if (err) {
     LOG_ERR("Couldn't initalize fruity tag: %d", err);
     goto blink_and_exit;
@@ -69,8 +69,6 @@ int main(void) {
     LOG_ERR("Couldn't update fruity tag: %d", err);
     goto blink_and_exit;
   }
-
-  bt_ctlr_set_public_addr(tag.bt_address);
 
   err = bt_enable(NULL);
   if (err) {

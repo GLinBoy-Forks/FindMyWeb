@@ -12,14 +12,13 @@ LOG_MODULE_REGISTER(fruitytag, CONFIG_FRUITYTAG_LOG_LEVEL);
 
 static fruity_tag* last_advertised_tag = NULL;
 
-int fruitytag_init(fruity_tag* tag, uint32_t adv_time_ms, bool addr_reversed) {
+int fruitytag_init(fruity_tag* tag, uint32_t adv_time_ms) {
   int err = 0;
   tag_advertisement default_adv = DEFAULT_TAG_ADVERTISEMENT;
   tag->adv = default_adv;
 
   tag->adv_time = MS_TO_ADV_INTERVAL(adv_time_ms);
-  tag->bt_address_rev = addr_reversed;
-
+  tag->bt_id = BT_ID_DEFAULT;
   return err;
 }
 
@@ -89,11 +88,28 @@ int fruitytag_update_pubkey(fruity_tag* tag, uint8_t* public_key, ssize_t public
     return err;
   }
 
-  err = tag_bt_address(tag->bt_address, sizeof(tag->bt_address), public_key, public_key_len, tag->bt_address_rev);
+  if (tag->bt_id != BT_ID_DEFAULT) {
+    err = bt_id_delete(tag->bt_id);
+    if (err) {
+      LOG_WRN("Couldn't delete old identity: %d\n", err);
+    }
+  }
+
+  bt_addr_le_t addr;
+  addr.type = BT_ADDR_LE_RANDOM;
+
+  err = tag_bt_address(addr.a.val, sizeof(addr.a.val), public_key, public_key_len, true);
   if (err) {
     LOG_ERR("Couldn't get bt address: %d", err);
     return err;
   }
+
+  err = bt_id_create(&addr, NULL);
+  if (err < 0) {
+    LOG_ERR("Couldn't create new identity for %x:%x:%x:%x:%x:%x: %d\n", addr.a.val[0], addr.a.val[1], addr.a.val[2], addr.a.val[3], addr.a.val[4], addr.a.val[5], err);
+    return err;
+  }
+  tag->bt_id = err;
 
   return err;
 }
