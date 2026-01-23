@@ -10,8 +10,6 @@
 
 LOG_MODULE_REGISTER(fruitytag, CONFIG_FRUITYTAG_LOG_LEVEL);
 
-static fruity_tag* last_advertised_tag = NULL;
-
 int fruitytag_init(fruity_tag* tag, uint32_t adv_time_ms) {
   int err = 0;
   tag_advertisement default_adv = DEFAULT_TAG_ADVERTISEMENT;
@@ -59,9 +57,6 @@ int fruitytag_start(fruity_tag* tag, bool restart) {
       LOG_ERR("Couldn't update advertising: %d", err);
       return err;
     }
-  }
-  if (last_advertised_tag != tag) {
-    last_advertised_tag = tag;
   }
 
   return err;
@@ -121,8 +116,6 @@ int fruitytag_stop() {
     LOG_ERR("Couldn't stop advertising: %d", err);
     return err;
   }
-
-  last_advertised_tag = NULL;
 
   return 0;
 }
