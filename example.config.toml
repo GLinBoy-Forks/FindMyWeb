@@ -1,4 +1,3 @@
-
 [jwt]
 secret = "REPLACE WITH A SECURE KEY"
 expire = 30                          # in minutes
@@ -13,8 +12,8 @@ name = "REPLACE WITH ADMIN USERNAME"
 password = "REPLACE WITH A SECURE KEY"
 
 [findmy]
-anisette = "http://localhost:6969"
-account = "REPLACE WITH ACCOUNT.JSON PATH"
+account = "ACCOUNT CONFIG PATH"
+libs_path = "ANISETTE LIBRARY PATH"
 
 [db]
 uri = "sqlite://REPLACE WITH DB PATH"
