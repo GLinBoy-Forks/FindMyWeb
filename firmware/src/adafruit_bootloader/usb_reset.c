@@ -1,4 +1,4 @@
-#include "adafruit_bootloader/adafruit_bootloader.h"
+#include "adafruit_bootloader.h"
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart/cdc_acm.h>
 #include <zephyr/drivers/usb/usb_dc.h>

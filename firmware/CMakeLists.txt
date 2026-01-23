@@ -17,7 +17,7 @@ target_sources(app PRIVATE src/blink_handler/blink_handler.c)
 if(CONFIG_NRF52_ADAFRUIT_BOOTLOADER)
     target_sources(app PRIVATE src/adafruit_bootloader/adafruit_bootloader.c)
     target_sources(app PRIVATE src/adafruit_bootloader/ble_srv_ota_reset.c)
-    target_sources(app PRIVATE src/usb_reset.c)
+    target_sources(app PRIVATE src/adafruit_bootloader/usb_reset.c)
 endif()
 
 if(CONFIG_SHELL)
