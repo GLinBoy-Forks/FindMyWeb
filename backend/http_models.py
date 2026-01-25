@@ -1,5 +1,4 @@
 import datetime
-import uuid
 
 from database.models import Accessory, Location
 from pydantic import BaseModel

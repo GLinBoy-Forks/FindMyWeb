@@ -89,7 +89,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
         userid = uuid.UUID(userid_str)
 
-    except (InvalidTokenError, TypeError) as ex:
+    except (InvalidTokenError, TypeError):
         raise CREDENTIALS_EXCEPTION
 
     user = await findmy.db.get_user_by_id(userid)

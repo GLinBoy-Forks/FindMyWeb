@@ -4,16 +4,15 @@ import hashlib
 import random
 import re
 
-from findmy import KeyPair
-from findmy.reports import AsyncAppleAccount, LocalAnisetteProvider
-from findmy.errors import UnhandledProtocolError
-
 from const import COLOR_REGEX_STR, CONFIG
 from database import Database
-from database.models import Accessory, Location, User, BatteryLevel
 from database.exceptions import LocationExists
+from database.models import Accessory, BatteryLevel, Location, User
+from findmy import KeyPair
+from findmy.errors import UnhandledProtocolError
+from findmy.reports import AsyncAppleAccount
 
-from FindMy.exceptions import WrongColorFormat, NotBase64
+from FindMy.exceptions import NotBase64, WrongColorFormat
 
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
 
@@ -153,7 +152,7 @@ class FindMy:
         else:
             try:
                 private_key = KeyPair.from_b64(private_key_b64)
-            except:
+            except Exception:
                 raise NotBase64("Provided key can't be decoded from base64.")
 
         if not COLOR_REGEX.match(color):
@@ -181,7 +180,7 @@ class FindMy:
     ) -> Accessory:
         try:
             private_key = KeyPair.from_b64(private_key_b64)
-        except:
+        except Exception:
             raise NotBase64("Provided key can't be decoded from base64.")
 
         if not COLOR_REGEX.match(color):
