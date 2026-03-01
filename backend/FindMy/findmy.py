@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import hashlib
+import logging
 import random
 import re
 
@@ -16,12 +17,17 @@ from FindMy.exceptions import NotBase64, WrongColorFormat
 
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
 
+LOG = logging.getLogger(__name__)
+
 
 class FindMy:
     UPDATE_INTERVAL_MIN = 40
     UPDATE_INTERVAL_MAX = 80
 
     def __init__(self):
+        LOG.debug(
+            f'Logging in to Apple with account="{CONFIG.findmy.account}" anisette_libs_path="{CONFIG.findmy.libs_path}"'
+        )
         self.account = AsyncAppleAccount.from_json(
             CONFIG.findmy.account, anisette_libs_path=CONFIG.findmy.libs_path
         )
@@ -49,20 +55,33 @@ class FindMy:
             await asyncio.sleep(
                 random.randint(self.UPDATE_INTERVAL_MAX, self.UPDATE_INTERVAL_MAX)
             )
-            await self._refetch_reports()
+            LOG.debug("Fetching new reports")
+            try:
+                await self._refetch_reports()
+            except Exception as ex:
+                LOG.error(f"Couldn't Fetch new reports: {ex}")
 
     async def _refetch_reports(self):
         for user in await self.db.get_users():
             accessories = await self.db.get_accessories_by_user(user=user)
             locations = await self._fetch_locations(accessories)
             if not locations:
+                LOG.debug(
+                    f"No Locations found for accessories owned by {user.username}"
+                )
                 continue
 
             for accessory_key in locations:
                 for location in locations[accessory_key]:
                     try:
                         await self.db.add_location(location)
+                        LOG.debug(
+                            f"Added {location.id} to: {user.username}: {'*' * min(len(accessory_key), 32)}{accessory_key[32:]}"
+                        )
                     except LocationExists:
+                        pass
+                    except Exception as ex:
+                        LOG.error(f"Couldn't add Location {location.id}: {ex}")
                         pass
 
     async def _fetch_locations(

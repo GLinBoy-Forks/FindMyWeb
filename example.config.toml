@@ -28,3 +28,24 @@ path = "REPLACE WITH DIST FOLDER PATH FROM FRONTEND"
 # cors_origins = ["*"]
 # cors_headers = ["*"]
 # cors_methods = ["*"]
+
+# If you want to debug something
+# [log]
+# version = 1
+# disable_existing_loggers = false
+
+
+# [log.formatters.detailed]
+# format = "%(log_color)s[%(asctime)s][%(name)s][%(levelname)s]: %(message)s"
+# class = "colorlog.ColoredFormatter"
+# datefmt = "%d-%m-%Y %H:%M:%S"
+
+# [log.handlers.console]
+# class = "logging.StreamHandler"
+# level = "DEBUG"
+# formatter = "detailed"
+# stream = "ext://sys.stdout"
+
+# [log.loggers.FindMy]
+# level = "DEBUG"
+# handlers = ["console"]

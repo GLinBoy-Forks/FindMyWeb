@@ -1,7 +1,8 @@
-import tomllib
 from typing import Optional
 
+import tomllib
 from pydantic import BaseModel
+from pydantic_settings_logging import LoggingSettings
 
 
 class JWTConfig(BaseModel):
@@ -43,6 +44,7 @@ class Config(BaseModel):
     findmy: FindMyConfig
     db: DBConfig
     frontend: FrontendConfig
+    log: LoggingSettings | None = None
     cors: Optional[CorsConfig] | None = None
 
 

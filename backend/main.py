@@ -1,3 +1,4 @@
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated
@@ -47,6 +48,9 @@ from http_models import (
     UsersResponse,
 )
 from jwt.exceptions import InvalidTokenError
+
+if CONFIG.log:
+    logging.config.dictConfig(CONFIG.log.model_dump())
 
 findmy = FindMy()
 
