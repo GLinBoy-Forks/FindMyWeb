@@ -55,6 +55,7 @@ def load_config(path: str = "config.toml") -> Config:
     fd.close()
 
     cfg = Config.model_validate(cfg_dict)
-    logging.config.dictConfig(cfg.log.model_dump())
+    if cfg.log:
+        logging.config.dictConfig(cfg.log.model_dump())
 
     return cfg
