@@ -29,9 +29,9 @@ cp ../example.config.toml ../config.toml
 5. Run the backend
 - Development:
 ```
-CONFIG_PATH="../config.toml" uvicorn main:app --reload --host 0.0.0.0 --port 8000
+CONFIG_PATH="../config.toml" uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 - Deploy:
 ```
-CONFIG_PATH="../config.toml" gunicorn -b 0.0.0.0 -p 8000 -k uvicorn.workers.UvicornWorker main:app
+CONFIG_PATH="../config.toml" gunicorn -b 0.0.0.0 -p 8000 -k uvicorn.workers.UvicornWorker app:app
 ```
