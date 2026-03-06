@@ -85,6 +85,9 @@ async function onSelect(tag: any, index: number) {
 
 async function onConfigure(key: string) {
     if (toggled != null) {
+        if (!sidebarEntries.value) {
+            return;
+        }
         sidebarEntries.value[toggled].toggle(false);
         toggled = null;
         emit("selected", null);

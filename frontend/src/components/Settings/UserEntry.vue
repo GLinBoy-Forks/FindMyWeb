@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue";
-
 const props = defineProps(["name", "superuser", "admin"]);
 const emit = defineEmits(["configure"]);
 

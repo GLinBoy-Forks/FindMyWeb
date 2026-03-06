@@ -292,7 +292,7 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
         coordinates: [location.lon, location.lat]
       },
     };
-
+    // @ts-ignore: Typing geoJSON is a terrible idea
     geoJSON.data.features.push(point);
   }
 
@@ -329,6 +329,9 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
       const accessoryName = e.features[0].properties.accessory_name;
 
       const location = (await FindMyWebAPI.getLocation(accessoryName, locationId)).location;
+      if (!location) {
+        return;
+      }
       const description = await getHtmlForLocation("Previous", accessoryName, location);
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
@@ -393,6 +396,9 @@ async function showTrace(accessory: Accessory, locations: BasicLocation[]) {
 
   const lastLocationId = locations.splice(0, 1)[0].id;
   const lastLocation = (await FindMyWebAPI.getLocation(accessory.name, lastLocationId)).location;
+  if (!lastLocation) {
+    return;
+  }
 
   // @ts-ignore: Typing geoJSON is a terrible idea
   await addLine(coordinates, accessory.color, 'trace');
