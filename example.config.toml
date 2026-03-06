@@ -46,6 +46,6 @@ path = "REPLACE WITH DIST FOLDER PATH FROM FRONTEND"
 # formatter = "detailed"
 # stream = "ext://sys.stdout"
 
-# [log.loggers.FindMy]
+# [log.loggers.app]
 # level = "DEBUG"
 # handlers = ["console"]

@@ -1,6 +1,6 @@
 import os
 
-from config import load_config
+from app.config import load_config
 
 DEFAULT_CFG_PATH = "config.toml"
 CFG_PATH = (

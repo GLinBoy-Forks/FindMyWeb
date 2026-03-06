@@ -1,18 +1,19 @@
 import datetime
 import uuid
 
-from const import CONFIG
 from pyargon2 import hash
 from sqlmodel import Session, SQLModel, create_engine, desc, or_, select
 
-from database.exceptions import (
+from app.const import CONFIG
+
+from .exceptions import (
     AccessoryDoesntExist,
     AccessoryExists,
     LocationExists,
     UserDoesNotExist,
     UserExists,
 )
-from database.models import Accessory, Location, User
+from .models import Accessory, Location, User
 
 
 class Database:
@@ -78,7 +79,7 @@ class Database:
             results = session.exec(statement=statement)
             try:
                 return results.one()
-            except:
+            except Exception:
                 raise AccessoryDoesntExist("Provided accessory doesn't exist")
 
     async def get_accessories_by_user(self, user: User) -> list[Accessory]:
@@ -225,7 +226,7 @@ class Database:
 
     async def remove_accessory(self, accessory: Accessory) -> None:
         with Session(self.engine) as session:
-            results = session.delete(accessory)
+            session.delete(accessory)
             session.commit()
 
     async def remove_user(self, username: str) -> None:
@@ -234,7 +235,7 @@ class Database:
             if not user:
                 raise UserDoesNotExist("User does not exist")
 
-            results = session.delete(user)
+            session.delete(user)
             session.commit()
 
     async def verify(self, user: User, password: str) -> bool:

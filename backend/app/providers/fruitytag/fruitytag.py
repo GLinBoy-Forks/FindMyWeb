@@ -5,26 +5,27 @@ import logging
 import random
 import re
 
-from const import COLOR_REGEX_STR, CONFIG
-from database import Database
-from database.exceptions import LocationExists
-from database.models import Accessory, BatteryLevel, Location, User
 from findmy import KeyPair
 from findmy.errors import UnhandledProtocolError
 from findmy.reports import AsyncAppleAccount
 
-from FindMy.exceptions import NotBase64, WrongColorFormat
+from app.const import COLOR_REGEX_STR, CONFIG
+from app.database import Database
+from app.database.exceptions import LocationExists
+from app.database.models import Accessory, BatteryLevel, Location, User
+
+from .exceptions import NotBase64, WrongColorFormat
 
 COLOR_REGEX = re.compile(COLOR_REGEX_STR)
 
 LOG = logging.getLogger(__name__)
 
 
-class FindMy:
+class FruityTag:
     UPDATE_INTERVAL_MIN = 40
     UPDATE_INTERVAL_MAX = 80
 
-    def __init__(self):
+    def __init__(self, db: Database):
         LOG.debug(
             f'Logging in to Apple with account="{CONFIG.findmy.account}" anisette_libs_path="{CONFIG.findmy.libs_path}"'
         )
@@ -32,7 +33,7 @@ class FindMy:
             CONFIG.findmy.account, anisette_libs_path=CONFIG.findmy.libs_path
         )
         self.update_task = None
-        self.db = Database()
+        self.db = db
 
     async def _ensure_admin(self, admin_user_name: str, admin_pwd: str) -> None:
         admin_user = await self.db.get_user(admin_user_name)
