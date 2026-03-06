@@ -173,6 +173,31 @@ export default class FindMyWeb {
     return (await response?.json()) as T;
   }
 
+  async _delete(
+    sub_url: string,
+    shouldRefresh: boolean = true,
+  ): Promise<boolean> {
+    let response = null;
+    for (let i = 0; i < 2; i++) {
+      response = await fetch(`${this.baseUrl}/${sub_url}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await this.getToken()}`,
+        },
+      });
+      if (response.status == 401 && shouldRefresh) {
+        await this.refreshToken();
+        continue;
+      }
+      break;
+    }
+
+    await this._verifyResponse(response);
+
+    return true;
+  }
+
   async _post<T>(sub_url: string, body: any, shouldRefresh: boolean = true) {
     let response = null;
     for (let i = 0; i < 2; i++) {
@@ -257,7 +282,7 @@ export default class FindMyWeb {
 
     this.tokenRefresh = true;
     try {
-      const response = await fetch(`${this.baseUrl}/refresh`, {
+      const response = await fetch(`${this.baseUrl}/login/refresh`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -295,12 +320,12 @@ export default class FindMyWeb {
   }
 
   async logout() {
-    await this._get("logout");
+    await this._delete("login");
     localStorage.removeItem("token");
   }
 
   async getAccessories(): Promise<AccessoriesResponse> {
-    return await this._get<AccessoriesResponse>("accessories");
+    return await this._get<AccessoriesResponse>("accessory");
   }
 
   async getAccessory(accessoryName: string): Promise<AccessoryResponse> {
@@ -314,7 +339,7 @@ export default class FindMyWeb {
     startDate: Date,
     endDate: Date,
   ): Promise<LocationsResponse> {
-    return await this._post<LocationsResponse>(`locations`, {
+    return await this._post<LocationsResponse>(`location/duration`, {
       name: accessoryName,
       start: startDate.toISOString(),
       end: endDate.toISOString(),
@@ -332,11 +357,11 @@ export default class FindMyWeb {
   }
 
   async getPrivateKey(): Promise<PrivateKeyResponse> {
-    return await this._get<PrivateKeyResponse>(`privatekey`);
+    return await this._get<PrivateKeyResponse>(`accessory/privatekey`);
   }
 
   async getAdvertisementKey(name: string): Promise<AdvertisementResponse> {
-    return await this._post<AdvertisementResponse>(`advertisement`, {
+    return await this._post<AdvertisementResponse>(`accessory/advertisement`, {
       name: name,
     });
   }
@@ -344,28 +369,28 @@ export default class FindMyWeb {
   async createAccessory(
     accessoryOptions: CreateAccessoryOptions,
   ): Promise<Accessory> {
-    return await this._post("create", accessoryOptions);
+    return await this._post("accessory/create", accessoryOptions);
   }
 
   async updateAccessory(
     accessoryOptions: CreateAccessoryOptions,
   ): Promise<Accessory> {
-    return await this._post("update", accessoryOptions);
+    return await this._post("accessory/update", accessoryOptions);
   }
 
   async updatePassword(oldPassword: string, newPassword: string) {
-    await this._post("change_password", {
+    await this._post("user/change_password", {
       old_password: oldPassword,
       new_password: newPassword,
     });
   }
 
   async removeAccessory(accessoryName: string) {
-    return await this._post("remove", { name: accessoryName });
+    return await this._post("accessory/remove", { name: accessoryName });
   }
 
   async getUsers(): Promise<UsersResponse> {
-    return await this._get("users");
+    return await this._get("user/list");
   }
 
   async createUser(name: string, password: string, isAdmin: boolean) {
