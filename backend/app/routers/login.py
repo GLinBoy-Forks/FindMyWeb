@@ -132,5 +132,7 @@ async def refresh(request: Request):
     if not user:
         raise CREDENTIALS_EXCEPTION
 
-    access_token = create_access_token(userid=str(user.id))
+    access_token = create_access_token(
+        userid=str(user.id), is_admin=user.admin, username=user.username
+    )
     return LoginResponse(access_token=access_token, token_type="bearer")
