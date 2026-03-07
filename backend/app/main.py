@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.const import CONFIG
 from app.providers import fruitytag
-from app.routers import accessory, location, login, user
+from app.routers import accessory, location, login, user, export
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +43,9 @@ app.include_router(
     user,
     prefix="/api/user",
 )
-
+app.include_router(
+    export,
+    prefix="/api/export",
+)
 
 app.mount("/", StaticFiles(directory=CONFIG.frontend.path, html=True), name="frontend")

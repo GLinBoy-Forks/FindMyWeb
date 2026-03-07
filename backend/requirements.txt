@@ -11,3 +11,4 @@ gunicorn>=23.0.0
 alembic>=1.16.5
 pydantic-settings-logging>=0.1.1
 colorlog>=6.10.1
+gpx>=2026.1.0
