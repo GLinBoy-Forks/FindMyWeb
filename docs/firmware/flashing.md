@@ -16,9 +16,9 @@ adafruit-nrfutil dfu genpkg --dev-type 0x0052 --sd-req 0x0123 --application zeph
 ```
 4. Flash the package
 ```
- adafruit-nrfutil dfu serial -pkg <package location (.zip)> -p <tty device> -b 115200 --singlebank -t 1200
+ adafruit-nrfutil dfu serial -pkg <package location (.zip)> -p <tty device> -b 115200 --singlebank
 ```
-5. You only have to do 3 and 4 for subsequent builds
+5. You only have to do 3 and 4 for subsequent builds. If you want to enter dfu mode from the shell just enter `dfu serial`
 
 #### uf2
 Flashing using uf2 only seems to work if you have an up-to-date bootloader. If unsure follow 1 and 2 from `adafruit-nrfutil`
