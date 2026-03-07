@@ -166,6 +166,29 @@ async function onDateRangeChange(startDate: Date, endDate: Date) {
     await map.value.showTrace(currentAccessory.value, locationResp.locations);
 }
 
+async function onDownloadGPX(startDate: Date, endDate: Date) {
+    if (
+        !map ||
+        !map.value ||
+        !currentAccessory.value ||
+        !currentAccessory.value.name
+    ) {
+        return;
+    }
+    const gpxData = await FindMyWebAPI.exportGPX(
+        currentAccessory.value.name,
+        startDate,
+        endDate,
+    );
+    const blob = new Blob([gpxData.data], { type: gpxData.type });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", gpxData.filename);
+    document.body.appendChild(link);
+    link.click();
+}
+
 async function loadTags() {
     try {
         const accessoriesResp = await FindMyWebAPI.getAccessories();
@@ -289,6 +312,7 @@ onMounted(async () => {
             @date-range-changed="onDateRangeChange"
             @open-settings="router.push({ name: 'Settings' })"
             @sidebar-change="(state) => sidebar?.updateSidebar(state)"
+            @downloadGPX="onDownloadGPX"
         />
         <div class="h-full w-full relative">
             <SideBar

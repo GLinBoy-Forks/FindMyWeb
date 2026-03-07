@@ -108,6 +108,17 @@ export class UsersResponse {
   users?: UserInfo[];
 }
 
+export class FileData {
+  data: ArrayBuffer;
+  filename: string;
+  type: string;
+  constructor(data: ArrayBuffer, filename: string, type: string) {
+    this.data = data;
+    this.filename = filename;
+    this.type = type;
+  }
+}
+
 export default class FindMyWeb {
   private baseUrl: string;
   private tokenRefresh: boolean;
@@ -411,5 +422,57 @@ export default class FindMyWeb {
       password: password,
       is_admin: isAdmin,
     });
+  }
+
+  async exportGPX(
+    accessoryName: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<FileData> {
+    let response = null;
+    for (let i = 0; i < 2; i++) {
+      response = await fetch(`${this.baseUrl}/export/gpx`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: accessoryName,
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await this.getToken()}`,
+        },
+      });
+      if (response.status == 401) {
+        await this.refreshToken();
+        continue;
+      }
+      break;
+    }
+    await this._verifyResponse(response);
+    const gpxData = await response?.arrayBuffer();
+    if (!gpxData) {
+      throw new FindMyWebError(
+        "No GPX data provided",
+        null,
+        "Server didn't return any text",
+      );
+    }
+    let fileName = `${accessoryName}.gpx`;
+
+    let contentDisposition = response?.headers.get("content-disposition");
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?(.+?)"?$/);
+      if (match != null && match.length === 2) {
+        fileName = match[1];
+        fileName = fileName.replace(/\+/g, "%20");
+        fileName = decodeURIComponent(fileName);
+      }
+    }
+    let contentType = response?.headers.get("content-type");
+    if (!contentType) {
+      contentType = "application/octet-stream";
+    }
+    return new FileData(gpxData, fileName, contentType);
   }
 }

@@ -9,7 +9,12 @@ const buttonIcon = ref("mdi:menu-open");
 
 const dateRange = ref<Date[]>([]);
 
-const emit = defineEmits(["sidebarChange", "openSettings", "dateRangeChanged"]);
+const emit = defineEmits([
+    "sidebarChange",
+    "openSettings",
+    "dateRangeChanged",
+    "downloadGPX",
+]);
 
 async function onSidebarButton() {
     sidebarOpened.value = !sidebarOpened.value;
@@ -19,6 +24,10 @@ async function onSidebarButton() {
         buttonIcon.value = "mdi:menu";
     }
     emit("sidebarChange", sidebarOpened.value);
+}
+
+async function onDownloadGPX() {
+    emit("downloadGPX", dateRange.value[0], dateRange.value[1]);
 }
 
 async function setDateRange(startDate: Date, endDate: Date) {
@@ -60,6 +69,16 @@ defineExpose({ setDateRange, hideDatePicker });
                 dark
             />
         </div>
+        <button
+            class="justify-start mt-auto mb-auto mr-2 size-10"
+            v-if="dateRange.length > 0"
+            @click="onDownloadGPX()"
+        >
+            <Icon
+                class="size-full text-gray-800 align-middle cursor-pointer"
+                icon="mdi:tray-download"
+            />
+        </button>
         <button
             class="size-10 justify-end flex-none"
             @click="emit('openSettings')"
