@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Annotated
+from typing import Annotated, Callable
 
 import jwt
 from fastapi import Depends
@@ -9,7 +9,7 @@ from jwt.exceptions import InvalidTokenError
 
 from app.const import CONFIG
 from app.database import db
-from app.database.models import User
+from app.database.models import Permissions, User
 from app.helpers import CREDENTIALS_EXCEPTION, USER_NOT_PERMITTED_EXCEPTION
 from app.models.login import AccessTokenData, TokenType
 
@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 
 
 async def get_current_user(
-    token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/login"))],
+    token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/api/login"))],
 ):
     try:
         payload = jwt.decode(
@@ -45,7 +45,12 @@ async def get_current_active_user(
     return current_user
 
 
-async def ensure_is_admin(current_user: Annotated[User, Depends(get_current_user)]):
-    if not current_user.admin:
-        raise USER_NOT_PERMITTED_EXCEPTION
-    return current_user
+def ensure_permissions(permission: Permissions) -> Callable:
+    async def check_user_permissions(
+        current_user: Annotated[User, Depends(get_current_active_user)],
+    ):
+        if (int(current_user.permissions) & permission) != permission:
+            raise USER_NOT_PERMITTED_EXCEPTION
+        return current_user
+
+    return check_user_permissions

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 
@@ -11,10 +11,8 @@ from app.const import CONFIG
 from app.database import db
 from app.database.models import User
 from app.dependencies import get_current_active_user
-from app.helpers import (
-    CREDENTIALS_EXCEPTION,
-    USER_NOT_PERMITTED_EXCEPTION,
-)
+from app.helpers import CREDENTIALS_EXCEPTION, USER_NOT_PERMITTED_EXCEPTION
+from app.models.common import OKStatusResponse, StatusResponse
 from app.models.login import (
     AccessTokenData,
     CookieType,
@@ -48,7 +46,7 @@ def create_refresh_token(
 
 def create_access_token(
     userid: str,
-    is_admin: bool,
+    permissions: int,
     username: str,
     expires_delta: timedelta = timedelta(minutes=CONFIG.jwt.expire),
 ) -> str:
@@ -56,7 +54,7 @@ def create_access_token(
 
     token_data = AccessTokenData(
         userid=userid,
-        is_admin=is_admin,
+        permissions=permissions,
         username=username,
         exp=int(expire.timestamp()),
         type=TokenType.ACCESS,
@@ -79,7 +77,7 @@ async def login_user(
         raise USER_NOT_PERMITTED_EXCEPTION
 
     access_token = create_access_token(
-        userid=str(user.id), is_admin=user.admin, username=user.username
+        userid=str(user.id), permissions=user.permissions, username=user.username
     )
 
     refresh_token = create_refresh_token(userid=str(user.id))
@@ -94,17 +92,16 @@ async def login_user(
 
 @login.delete("")
 async def logout(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-) -> Response:
-    response = Response(status_code=status.HTTP_200_OK)
+    current_user: Annotated[User, Depends(get_current_active_user)], response: Response
+) -> StatusResponse:
     response.delete_cookie(
         key=CookieType.REFRESH.value,
     )
-    return response
+    return OKStatusResponse()
 
 
 @login.get("/refresh")
-async def refresh(request: Request):
+async def refresh(request: Request) -> LoginResponse:
     refresh_token = request.cookies.get(CookieType.REFRESH.value, None)
 
     if not refresh_token:
@@ -133,6 +130,6 @@ async def refresh(request: Request):
         raise CREDENTIALS_EXCEPTION
 
     access_token = create_access_token(
-        userid=str(user.id), is_admin=user.admin, username=user.username
+        userid=str(user.id), permissions=user.permissions, username=user.username
     )
     return LoginResponse(access_token=access_token, token_type="bearer")

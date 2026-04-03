@@ -8,6 +8,7 @@ CFG_PATH = (
     if os.environ.get("CONFIG_PATH", None)
     else DEFAULT_CFG_PATH
 )
+MAINTENANCE_MODE = True if os.environ.get("MAINTENANCE", None) else False
 
 CONFIG = load_config(CFG_PATH)
 

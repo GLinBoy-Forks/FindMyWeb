@@ -16,3 +16,7 @@ class UserDoesNotExist(Exception):
 
 class LocationExists(Exception):
     """Raised when the location already exists"""
+
+
+class ProviderDoesntExist(Exception):
+    """Raised when the provider doesn't exist"""

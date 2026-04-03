@@ -1,8 +1,8 @@
-from typing import Optional
 import logging.config
-
 import tomllib
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import BaseModel, Field
 from pydantic_settings_logging import LoggingSettings
 
 
@@ -29,10 +29,16 @@ class DBConfig(BaseModel):
 
 
 class CorsConfig(BaseModel):
-    allow_credentials: bool
-    cors_origins: list[str]
-    cors_headers: list[str]
-    cors_methods: list[str]
+    allow_credentials: bool = False
+    cors_origins: list[str] = Field(default_factory=list)
+    cors_headers: list[str] = Field(default_factory=list)
+    cors_methods: list[str] = Field(default_factory=list)
+    expose_headers: list[str] = Field(default_factory=list)
+
+
+class CompressionConfig(BaseModel):
+    enabled: bool = True
+    minimum_size: int = 1000
 
 
 class FrontendConfig(BaseModel):
@@ -45,6 +51,7 @@ class Config(BaseModel):
     findmy: FindMyConfig
     db: DBConfig
     frontend: FrontendConfig
+    compression: CompressionConfig = CompressionConfig()
     log: LoggingSettings | None = None
     cors: Optional[CorsConfig] | None = None
 

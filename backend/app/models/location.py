@@ -1,39 +1,20 @@
-import datetime
+from typing import Union
 
-from app.database.models import Location
-from pydantic import BaseModel
+from app.database.models import FruityTagLocationInfo, Location, LocationInfo
+from pydantic import AwareDatetime, BaseModel
 
 from .accessory import AccessoryBaseRequest
 
 
-class BasicLocation(BaseModel):
-    id: str
-    lat: float
-    lon: float
-    timestamp: datetime.datetime
-
-    @staticmethod
-    def from_location(location: Location):
-        return BasicLocation(
-            id=location.id,
-            lat=location.lat,
-            lon=location.lon,
-            timestamp=location.timestamp,
-        )
-
-
 class LocationsResponse(BaseModel):
-    locations: list[BasicLocation]
+    locations: list[Location]
 
 
 class LocationResponse(BaseModel):
-    location: Location | None
+    location: Location
+    info: Union[LocationInfo, FruityTagLocationInfo, None] = None
 
 
 class LocationsRequest(AccessoryBaseRequest):
-    start: datetime.datetime
-    end: datetime.datetime
-
-
-class LocationRequest(AccessoryBaseRequest):
-    location_id: str | None = None
+    start: AwareDatetime
+    end: AwareDatetime

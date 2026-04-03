@@ -11,6 +11,10 @@ ACCESSORY_NOT_FOUND_EXCEPTION = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND, detail="Accessory not found"
 )
 
+ACCESSORY_EXISTS_EXCEPTION = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST, detail="Accessory exists"
+)
+
 LOCATION_NOT_FOUND_EXCEPTION = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND, detail="Location not found"
 )
@@ -22,4 +26,8 @@ USER_NOT_FOUND_EXCEPTION = HTTPException(
 
 USER_NOT_PERMITTED_EXCEPTION = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN, detail="User not permitted"
+)
+
+UNKNOW_PROVIDER_EXCEPTION = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Couldn't find provider"
 )

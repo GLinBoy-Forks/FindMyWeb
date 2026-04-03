@@ -1,12 +1,14 @@
+import uuid
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserInfo(BaseModel):
+    id: uuid.UUID
     name: str
     superuser: bool
-    is_admin: bool
+    permissions: int
 
 
 class UsersResponse(BaseModel):
@@ -19,15 +21,15 @@ class ChangePasswordRequest(BaseModel):
 
 
 class UpdateUserRequest(BaseModel):
-    name: str
-    password: str
-    is_admin: bool
+    name: str | None = Field(min_length=1)
+    password: str | None = Field(min_length=1)
+    permissions: int | None
 
 
 class CreateUserRequest(BaseModel):
     name: str
     password: str
-    is_admin: bool
+    permissions: int
 
 
 class LogoutResponse(BaseModel):

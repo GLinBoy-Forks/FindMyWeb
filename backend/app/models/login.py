@@ -3,7 +3,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class TokenType(Enum):
+class TokenType(str, Enum):
     ACCESS = "access"
     REFRESH = "refresh"
 
@@ -24,7 +24,7 @@ class JWTToken(BaseModel):
 
 class AccessTokenData(JWTToken):
     userid: str
-    is_admin: bool
+    permissions: int
     username: str
 
 
