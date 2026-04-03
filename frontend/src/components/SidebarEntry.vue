@@ -10,6 +10,7 @@ async function toggle(state: boolean) {
 }
 
 const props = defineProps([
+    "id",
     "color",
     "name",
     "icon",
@@ -19,7 +20,9 @@ const props = defineProps([
 ]);
 
 function getBatteryIcon(): string {
-    switch (props.batteryLevel) {
+    const batteryLevel: BatteryLevel = BatteryLevel[props.batteryLevel];
+
+    switch (batteryLevel) {
         case BatteryLevel.Full:
             return "mdi:battery";
         case BatteryLevel.Medium:

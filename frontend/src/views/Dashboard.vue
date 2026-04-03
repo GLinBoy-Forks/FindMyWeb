@@ -10,7 +10,7 @@ import {
 } from "vue";
 import Error from "../components/Error.vue";
 import Loading from "../components/Loading.vue";
-import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
+import FindMyWeb, { type Accessory, FindMyWebError } from "../lib/FindMyWeb.ts";
 import { locationDate } from "../lib/helpers.ts";
 
 const Map = defineAsyncComponent({
@@ -37,6 +37,14 @@ const AccessoryConfig = defineAsyncComponent({
     timeout: 3000,
 });
 
+const Overlay = defineAsyncComponent({
+    loader: () => import("../components/Overlay.vue"),
+    loadingComponent: Loading,
+    delay: 200,
+    errorComponent: Error,
+    timeout: 3000,
+});
+
 import Header from "../components/Header.vue";
 
 import { useRouter } from "vue-router";
@@ -49,23 +57,24 @@ const FindMyWebAPI = new FindMyWeb();
 const sidebar = useTemplateRef<typeof SideBar>("sidebar");
 const map = useTemplateRef<typeof Map>("map");
 const header = useTemplateRef<typeof Header>("header");
-const showOverlay = ref(false);
-
-const overlayAccessory = ref<Accessory | null>(null);
-
+const overlay = useTemplateRef<typeof Overlay>("overlay");
+const configureAccessory =
+    useTemplateRef<typeof AccessoryConfig>("configureAccessory");
+const accessoryToConfigure = ref(null);
+const accessoryInfoToConfigure = ref(null);
 const currentAccessory = ref<Accessory | null>(null);
 
 let accessories: Accessory[] | null = null;
 
 let refreshId: number | null = null;
 
-async function accessoryByName(name: string): Promise<Accessory | null> {
+async function accessoryByID(id: string): Promise<Accessory | null> {
     if (!accessories) {
         return null;
     }
 
     for (let i = 0; i < accessories.length; i++) {
-        if (accessories[i].name != name) {
+        if (accessories[i].id != id) {
             continue;
         }
         return accessories[i];
@@ -84,45 +93,45 @@ async function showMarkers() {
 
     for (let i = 0; i < accessories.length; i++) {
         const accessory = accessories[i];
-        if (!accessory.name) {
+        let locationResp = null;
+        try {
+            locationResp = await FindMyWebAPI.getLastLocation(accessory.id);
+        } catch {
             continue;
         }
+        const locationInfo = await FindMyWebAPI.getLocationInfo(
+            accessory.id,
+            locationResp.id,
+        );
+        coordinates.push([locationResp.lon, locationResp.lat]);
 
-        const locationResp = await FindMyWebAPI.getLocation(accessory.name);
-
-        if (!locationResp.location) {
-            continue;
-        }
-        coordinates.push([
-            locationResp.location.lon,
-            locationResp.location.lat,
-        ]);
-
-        await map.value.showMarker(accessory, locationResp.location);
+        await map.value.showMarker(
+            accessory,
+            locationInfo.location,
+            locationInfo.info,
+        );
     }
     await map.value.zoomToCoordinates(coordinates, 200);
 }
 
-async function onSelected(name: string | null) {
+async function onSelected(id: string | null) {
     if (!map || !map.value || !header.value) {
         return;
     }
 
-    if (name != null) {
-        currentAccessory.value = await accessoryByName(name);
+    if (id != null) {
+        currentAccessory.value = await accessoryByID(id);
 
-        if (!currentAccessory.value || !currentAccessory.value.name) {
+        if (!currentAccessory.value || !currentAccessory.value.id) {
             currentAccessory.value = null;
             return;
         }
-        const lastLocation = await FindMyWebAPI.getLocation(
-            currentAccessory.value.name,
-        );
-        if (!lastLocation.location) {
-            return;
-        }
 
-        const endDate = await locationDate(lastLocation.location);
+        const lastLocation = await FindMyWebAPI.getLastLocation(
+            currentAccessory.value.id,
+        );
+
+        const endDate = await locationDate(lastLocation);
         if (!endDate) {
             return;
         }
@@ -133,7 +142,7 @@ async function onSelected(name: string | null) {
 
         await header.value.setDateRange(startDate, endDate);
         let locationResp = await FindMyWebAPI.getLocations(
-            currentAccessory.value.name,
+            currentAccessory.value.id,
             startDate,
             endDate,
         );
@@ -159,7 +168,7 @@ async function onDateRangeChange(startDate: Date, endDate: Date) {
         return;
     }
     let locationResp = await FindMyWebAPI.getLocations(
-        currentAccessory.value.name,
+        currentAccessory.value.id,
         startDate,
         endDate,
     );
@@ -176,12 +185,11 @@ async function onDownloadGPX(startDate: Date, endDate: Date) {
         return;
     }
     const gpxData = await FindMyWebAPI.exportGPX(
-        currentAccessory.value.name,
+        currentAccessory.value.id,
         startDate,
         endDate,
     );
-    const blob = new Blob([gpxData.data], { type: gpxData.type });
-    const url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(gpxData.blob);
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", gpxData.filename);
@@ -192,7 +200,6 @@ async function onDownloadGPX(startDate: Date, endDate: Date) {
 async function loadTags() {
     try {
         const accessoriesResp = await FindMyWebAPI.getAccessories();
-        // @ts-ignore: API should never return empty response
         accessories = accessoriesResp.accessories;
     } catch (error) {
         alert(error);
@@ -216,7 +223,7 @@ async function reloadAndShow() {
 }
 
 async function newAccessory() {
-    showOverlay.value = true;
+    await overlay.value.showOverlay("newAccessory");
 }
 
 async function startInterval() {
@@ -244,29 +251,33 @@ async function init() {
 }
 
 async function onSaveCancel() {
-    showOverlay.value = false;
-    overlayAccessory.value = null;
+    await overlay.value.hideOverlay();
     reloadAndShow();
 }
 
-async function onConfigure(name: string) {
-    let accessoryResponse;
+async function onConfigure(id: string) {
+    let accessory;
     try {
-        accessoryResponse = await FindMyWebAPI.getAccessory(name);
-    } catch (error: any) {
+        accessory = await FindMyWebAPI.getAccessory(id);
+    } catch (error: Error) {
         console.error(`onConfigure: ${error.name}: ${error.detail()}`);
         await reloadTags();
         return;
     }
-    const accessory = accessoryResponse.accessory;
 
     if (!accessory) {
         await reloadTags();
         return;
     }
+    accessoryToConfigure.value = accessory.accessory;
+    accessoryInfoToConfigure.value = accessory.info;
+    await overlay.value.showOverlay("configureAccessory");
+}
 
-    overlayAccessory.value = accessory;
-    showOverlay.value = true;
+async function onNewAccessory() {
+    accessoryToConfigure.value = null;
+    accessoryInfoToConfigure.value = null;
+    await overlay.value.showOverlay("configureAccessory");
 }
 
 onBeforeUnmount(async () => {
@@ -294,17 +305,17 @@ onMounted(async () => {
         leave-active-class="transition duration-300"
         mode="out-in"
     >
-        <div
-            v-if="showOverlay"
-            id="overlay"
-            class="fixed w-dvw h-dvh top-0 left-0 right-0 bottom-0 bg-black/80 z-20"
-        >
-            <AccessoryConfig
-                :accessory-to-configure="overlayAccessory"
-                @cancel="onSaveCancel"
-                @save="onSaveCancel"
-            />
-        </div>
+        <Overlay ref="overlay">
+            <template v-slot:configureAccessory>
+                <AccessoryConfig
+                    ref="configureAccessory"
+                    :accessory="accessoryToConfigure"
+                    :info="accessoryInfoToConfigure"
+                    @cancel="onSaveCancel"
+                    @save="onSaveCancel"
+                />
+            </template>
+        </Overlay>
     </Transition>
     <div class="flex flex-col h-dvh">
         <Header
@@ -317,8 +328,8 @@ onMounted(async () => {
         <div class="h-full w-full relative">
             <SideBar
                 @selected="onSelected"
-                @new-accessory="newAccessory"
                 @configure="onConfigure"
+                @new-accessory="onNewAccessory"
                 ref="sidebar"
             />
             <div class="h-full w-full">

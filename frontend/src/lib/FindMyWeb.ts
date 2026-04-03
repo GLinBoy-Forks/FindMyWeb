@@ -1,6 +1,105 @@
-import { jwtDecode, type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import type { Middleware } from "openapi-fetch";
+import createClient from "openapi-fetch";
+import { type ErrorResponse } from "openapi-typescript-helpers";
+
+import type { paths, components } from "./schema.d.ts";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+export type Location = components["schemas"]["Location"];
+
+export type Accessory = components["schemas"]["Accessory"];
+export type LocationInfo =
+  | components["schemas"]["FruityTagLocationInfo"]
+  | null;
+export type UserInfo = components["schemas"]["UserInfo"];
+
+export enum AccessoryType {
+  FRUITYTAG_STATIC = "FruityTagStatic",
+  FRUITYTAG_ROLLING = "FruityTagRolling",
+}
+
+export enum BatteryLevel {
+  Full = "Full",
+  Medium = "Medium",
+  Low = "Low",
+  Critical = "Critical",
+  Unknown = "Unknown",
+}
+
+export enum LocationType {
+  BASIC = "Basic",
+  FRUITYTAG = "FruityTag",
+}
+
+export enum Permissions {
+  USER = 0b0,
+  ADMIN = 0b1,
+}
+
+export type TokenData = {
+  userid: string;
+  username: string;
+  permissions: number;
+};
+
+type HTTPValidationError = components["schemas"]["HTTPValidationError"];
+
+type AccessoriesResponse =
+  paths["/api/accessory"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type CreateAccessoryOptions =
+  paths["/api/accessory"]["post"]["requestBody"]["content"]["application/json"];
+
+type CreateAccessoryResponse =
+  paths["/api/accessory"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type GetAccessoryResponse =
+  paths["/api/accessory/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type RemoveAccessoryResponse =
+  paths["/api/accessory/{id}"]["delete"]["responses"]["200"]["content"]["application/json"];
+
+type UpdateAccessoryResponse =
+  paths["/api/accessory/{id}"]["post"]["responses"]["200"]["content"]["application/json"];
+type UpdateAccessoryOptions =
+  paths["/api/accessory/{id}"]["post"]["requestBody"]["content"]["application/json"];
+
+type GetLocationResponse =
+  paths["/api/location/{accessory_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type GetLocationInfoResponse =
+  paths["/api/location/info/{accessory_id}/{location_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type GetLocationsResponse =
+  paths["/api/location/duration/{accessory_id}"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type LoginUserResponse =
+  paths["/api/login"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type LogoutUserResponse =
+  paths["/api/login"]["delete"]["responses"]["200"]["content"]["application/json"];
+// @ts-ignore
+type LoginRefreshResponse =
+  paths["/api/login/refresh"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type GetUsersResponse =
+  paths["/api/user/list"]["get"]["responses"]["200"]["content"]["application/json"];
+
+type CreateUserResponse =
+  paths["/api/user/create"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type RemoveUserResponse =
+  paths["/api/user/{id}"]["delete"]["responses"]["200"]["content"]["application/json"];
+
+type UpdateUserResponse =
+  paths["/api/user/{id}"]["post"]["responses"]["200"]["content"]["application/json"];
+
+type ChangePasswordResponse =
+  paths["/api/user/change_password"]["post"]["responses"]["200"]["content"]["application/json"];
+
+const client = createClient<paths>({ baseUrl: API_BASE_URL });
 
 export class FindMyWebError extends Error {
   detail_str: string;
@@ -22,223 +121,141 @@ export class FindMyWebError extends Error {
   }
 }
 
-export enum BatteryLevel {
-  Full = 0b00,
-  Medium = 0b01,
-  Low = 0b10,
-  Critical = 0b11,
-}
-
-export class Location {
-  id?: string;
-  lat?: number;
-  lon?: number;
-  timestamp?: string;
-  battery_level?: BatteryLevel;
-  status?: number;
-  confidence?: number;
-  horizontal_accuracy?: number;
-  accessory_key?: string;
-}
-
-export class BasicLocation {
-  id?: string;
-  lat?: number;
-  lon?: number;
-  timestamp?: string;
-}
-
-export class Accessory {
-  private_key?: string;
-  name?: string;
-  color?: string;
-  icon?: string;
-  user_id?: string;
-}
-
-export class CreateAccessoryOptions {
-  name: string;
-  color: string;
-  icon: string;
-  private_key: string | null = null;
-  constructor(
-    name: string,
-    color: string,
-    icon: string,
-    private_key: string | null = null,
-  ) {
-    this.name = name;
-    this.color = color;
-    this.icon = icon;
-    this.private_key = private_key;
-  }
-}
-
-export class AccessoriesResponse {
-  accessories?: Accessory[];
-}
-
-export class AccessoryResponse {
-  accessory?: Accessory;
-}
-
-export class AdvertisementResponse {
-  advertisement_key?: string;
-}
-
-export class LocationsResponse {
-  locations?: BasicLocation[];
-}
-
-export class LocationResponse {
-  location?: Location;
-}
-
-export class PrivateKeyResponse {
-  private_key?: string;
-}
-
-export class UserInfo {
-  name?: string;
-  is_admin?: boolean;
-  superuser?: boolean;
-}
-
-export class UsersResponse {
-  users?: UserInfo[];
-}
-
 export class FileData {
-  data: ArrayBuffer;
+  blob: Blob;
   filename: string;
-  type: string;
-  constructor(data: ArrayBuffer, filename: string, type: string) {
-    this.data = data;
+  constructor(blob: Blob, filename: string) {
+    this.blob = blob;
     this.filename = filename;
-    this.type = type;
   }
 }
+
+function decodePermissions(perm: number): Array<number> {
+  let perms: Array<number> = [];
+  for (let key in Permissions) {
+    if (!isNaN(Number(key))) {
+      continue;
+    }
+    let value = Number(Permissions[key]);
+    if (perm & value) {
+      perms.push(value);
+    }
+  }
+  return perms;
+}
+
+export function hasPermission(
+  permsission_num: number,
+  permission: Permissions,
+): boolean {
+  const permissions = decodePermissions(permsission_num);
+  return permissions.includes(permission);
+}
+
+async function setToken(token: string | null) {
+  if (!token) {
+    localStorage.removeItem("token");
+  } else {
+    localStorage.setItem("token", token);
+  }
+}
+
+async function getToken(): Promise<string> {
+  let token = localStorage.getItem("token");
+  if (token == null) {
+    throw new Error("Token was not found in local storage");
+  }
+  return token;
+}
+
+const UNPROTECTED_ROUTES = ["/api/login/refresh"];
+
+const authMiddleware: Middleware = {
+  async onRequest({ schemaPath, request }) {
+    if (
+      UNPROTECTED_ROUTES.some((pathname) => schemaPath.startsWith(pathname)) ||
+      (request.method == "POST" && schemaPath == "/api/login")
+    ) {
+      return undefined;
+    }
+    const jwt = jwtDecode(await getToken());
+    var current_time = Date.now() / 1000;
+    if (jwt.exp && jwt.exp < current_time) {
+      const {
+        data,
+        error: fetchError,
+        // @ts-ignore
+        response,
+      } = await client.GET("/api/login/refresh");
+      if (fetchError) {
+        await setToken(null);
+        return undefined;
+      }
+      await setToken(data.access_token);
+    }
+    request.headers.set("Authorization", `Bearer ${await getToken()}`);
+    return request;
+  },
+};
+
+client.use(authMiddleware);
 
 export default class FindMyWeb {
-  private baseUrl: string;
-  private tokenRefresh: boolean;
-
-  constructor() {
-    this.baseUrl = API_BASE_URL;
-    this.tokenRefresh = false;
-  }
-
-  async _parseJwt(token: string) {
-    var base64Url = token.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
-        .split("")
-        .map(function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join(""),
-    );
-
-    return JSON.parse(jsonPayload);
-  }
-
-  async _verifyResponse(response: Response | null) {
-    if (!response) {
-      throw new FindMyWebError(`No request sent`, null, "No request sent");
-    }
-
-    if (!response.ok) {
-      let responseJs = await response.json();
-      let errorDetail = responseJs.detail
-        ? responseJs.detail
-        : "No error provided by API";
-      throw new FindMyWebError(
-        `Error sending request to ${response.url}: ${response.statusText}`,
-        response.status,
-        errorDetail,
-      );
-    }
-  }
-
-  async _get<T>(sub_url: string, shouldRefresh: boolean = true): Promise<T> {
-    let response = null;
-    for (let i = 0; i < 2; i++) {
-      response = await fetch(`${this.baseUrl}/${sub_url}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await this.getToken()}`,
-        },
-      });
-      if (response.status == 401 && shouldRefresh) {
-        await this.refreshToken();
-        continue;
-      }
-      break;
-    }
-
-    await this._verifyResponse(response);
-
-    return (await response?.json()) as T;
-  }
-
-  async _delete(
-    sub_url: string,
-    shouldRefresh: boolean = true,
-  ): Promise<boolean> {
-    let response = null;
-    for (let i = 0; i < 2; i++) {
-      response = await fetch(`${this.baseUrl}/${sub_url}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await this.getToken()}`,
-        },
-      });
-      if (response.status == 401 && shouldRefresh) {
-        await this.refreshToken();
-        continue;
-      }
-      break;
-    }
-
-    await this._verifyResponse(response);
-
-    return true;
-  }
-
-  async _post<T>(sub_url: string, body: any, shouldRefresh: boolean = true) {
-    let response = null;
-    for (let i = 0; i < 2; i++) {
-      response = await fetch(`${this.baseUrl}/${sub_url}`, {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await this.getToken()}`,
-        },
-      });
-      if (response.status == 401 && shouldRefresh) {
-        await this.refreshToken();
-        continue;
-      }
-      break;
-    }
-    await this._verifyResponse(response);
-
-    return (await response?.json()) as T;
-  }
-
-  async _decodeJWT(): Promise<JwtPayload | null> {
+  constructor() {}
+  async _decodeJWT(): Promise<TokenData | null> {
     let decoded = null;
     try {
-      decoded = jwtDecode(await this.getToken());
+      decoded = jwtDecode(await getToken());
     } catch (error) {
       return null;
     }
-    return decoded;
+    return decoded as TokenData;
+  }
+
+  async _httpValidationErrorToString(error: HTTPValidationError) {
+    if (!error.detail) {
+      return "Unknown error occured :(";
+    } else if (typeof error.detail == "string") {
+      return error.detail;
+    }
+
+    let text = "";
+    for (let i = 0; i < error.detail.length; i++) {
+      let detail = error.detail[i];
+      text += `- ${detail.msg} (${detail.type}) at `;
+      if (!detail.loc) {
+        continue;
+      }
+      for (let x = 0; x < detail.loc.length; x++) {
+        text += `/${detail.loc[x]}`;
+      }
+      if (i < error.detail.length) {
+        text += "\n";
+      }
+    }
+    return text;
+  }
+
+  async _verifyResponse<T>(
+    data: T | undefined,
+    error: ErrorResponse<any>,
+    response: Response,
+  ): Promise<T> {
+    if (error) {
+      let detailStr = "Unknown";
+      if ((error.detail as HTTPValidationError) !== undefined) {
+        detailStr = await this._httpValidationErrorToString(error);
+      }
+      throw new FindMyWebError(response.statusText, response.status, detailStr);
+    }
+    if (!data) {
+      throw new FindMyWebError(
+        "Unexpected error occured",
+        500,
+        "Endpoint didn't return any data but response was successful",
+      );
+    }
+    return data as T;
   }
 
   async getUsername(): Promise<string> {
@@ -250,11 +267,10 @@ export default class FindMyWeb {
         "Couldn't decode jwt",
       );
     }
-    // @ts-ignore: Property does not exist on type
     return jwt.username;
   }
 
-  async isAdmin(): Promise<boolean> {
+  async userHasPermission(permission: Permissions) {
     const jwt = await this._decodeJWT();
     if (!jwt) {
       throw new FindMyWebError(
@@ -263,203 +279,342 @@ export default class FindMyWeb {
         "Couldn't decode jwt",
       );
     }
-    // @ts-ignore: Property does not exist on type
-    return jwt.is_admin;
+    return hasPermission(jwt.permissions, permission);
   }
-
-  async setToken(token: string) {
-    if (!token) {
-      throw new Error("API didn't provide a token");
-    }
-    localStorage.setItem("token", token);
-  }
-
-  async getToken(): Promise<string> {
-    while (this.tokenRefresh) {
-      await new Promise((f) => setTimeout(f, 10));
-    }
-
-    let token = localStorage.getItem("token");
-    if (token == null) {
-      throw new Error("Token was not found in local storage");
-    }
-    return token;
-  }
-
-  async refreshToken() {
-    if (this.tokenRefresh) {
-      return;
-    }
-
-    this.tokenRefresh = true;
-    try {
-      const response = await fetch(`${this.baseUrl}/login/refresh`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJSON = await response.json();
-      const token = responseJSON["access_token"];
-      await this.setToken(token);
-    } finally {
-      this.tokenRefresh = false;
-    }
-  }
-
-  async login(username: string, password: string): Promise<any> {
-    const data = new FormData();
-    data.append("username", username);
-    data.append("password", password);
-
-    const response = await fetch(`${this.baseUrl}/login`, {
-      method: "POST",
-      body: data,
+  async login(username: string, password: string): Promise<LoginUserResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/login", {
+      body: {
+        password: password,
+        username: username,
+        scope: "client",
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     });
-
-    if (!response.ok) {
-      throw new Error("Login failed: " + response.statusText);
-    }
-
-    const responseJSON = await response.json();
-
-    const token = responseJSON["access_token"];
-    await this.setToken(token);
-
-    return token;
+    const responseData = await this._verifyResponse<LoginUserResponse>(
+      data,
+      fetchError,
+      response,
+    );
+    await setToken(responseData.access_token);
+    return responseData;
   }
 
   async logout() {
-    await this._delete("login");
-    localStorage.removeItem("token");
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.DELETE("/api/login", {});
+    await setToken(null);
+    await this._verifyResponse<LogoutUserResponse>(data, fetchError, response);
   }
 
   async getAccessories(): Promise<AccessoriesResponse> {
-    return await this._get<AccessoriesResponse>("accessory");
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.GET("/api/accessory", {});
+    return await this._verifyResponse<AccessoriesResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
-  async getAccessory(accessoryName: string): Promise<AccessoryResponse> {
-    return await this._post<AccessoryResponse>(`accessory`, {
-      name: accessoryName,
+  async getAccessory(accessoryID: string): Promise<GetAccessoryResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.GET("/api/accessory/{id}", {
+      params: {
+        path: {
+          id: accessoryID,
+        },
+      },
     });
+    return await this._verifyResponse<GetAccessoryResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
   async getLocations(
-    accessoryName: string,
+    accessoryID: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<LocationsResponse> {
-    return await this._post<LocationsResponse>(`location/duration`, {
-      name: accessoryName,
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
+  ): Promise<GetLocationsResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/location/duration/{accessory_id}", {
+      params: {
+        path: {
+          accessory_id: accessoryID,
+        },
+      },
+      body: {
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+      },
     });
+    return await this._verifyResponse<GetLocationsResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
-  async getLocation(
-    accessoryName: string,
-    locationId: string | undefined = undefined,
-  ): Promise<LocationResponse> {
-    return await this._post<LocationResponse>(`location`, {
-      name: accessoryName,
-      location_id: locationId,
+  async getLocationInfo(
+    accessoryID: string,
+    locationID: string,
+  ): Promise<GetLocationInfoResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.GET("/api/location/info/{accessory_id}/{location_id}", {
+      params: {
+        path: {
+          accessory_id: accessoryID,
+          location_id: locationID,
+        },
+      },
     });
+    return await this._verifyResponse<GetLocationInfoResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
-  async getPrivateKey(): Promise<PrivateKeyResponse> {
-    return await this._get<PrivateKeyResponse>(`accessory/privatekey`);
-  }
-
-  async getAdvertisementKey(name: string): Promise<AdvertisementResponse> {
-    return await this._post<AdvertisementResponse>(`accessory/advertisement`, {
-      name: name,
+  async getLastLocation(accessoryID: string): Promise<GetLocationResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.GET("/api/location/{accessory_id}", {
+      params: {
+        path: {
+          accessory_id: accessoryID,
+        },
+      },
     });
+    return await this._verifyResponse<GetLocationResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
   async createAccessory(
     accessoryOptions: CreateAccessoryOptions,
-  ): Promise<Accessory> {
-    return await this._post("accessory/create", accessoryOptions);
+  ): Promise<CreateAccessoryResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/accessory", {
+      body: accessoryOptions,
+    });
+    return await this._verifyResponse<CreateAccessoryResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
   async updateAccessory(
-    accessoryOptions: CreateAccessoryOptions,
-  ): Promise<Accessory> {
-    return await this._post("accessory/update", accessoryOptions);
-  }
-
-  async updatePassword(oldPassword: string, newPassword: string) {
-    await this._post("user/change_password", {
-      old_password: oldPassword,
-      new_password: newPassword,
+    accessoryID: string,
+    accessoryOptions: UpdateAccessoryOptions,
+  ): Promise<UpdateAccessoryResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/accessory/{id}", {
+      params: {
+        path: {
+          id: accessoryID,
+        },
+      },
+      body: accessoryOptions,
     });
+    return await this._verifyResponse<UpdateAccessoryResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
-  async removeAccessory(accessoryName: string) {
-    return await this._post("accessory/remove", { name: accessoryName });
-  }
-
-  async getUsers(): Promise<UsersResponse> {
-    return await this._get("user/list");
-  }
-
-  async createUser(name: string, password: string, isAdmin: boolean) {
-    return await this._post("user/create", {
-      name: name,
-      password: password,
-      is_admin: isAdmin,
+  async updatePassword(
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<ChangePasswordResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/user/change_password", {
+      body: {
+        old_password: oldPassword,
+        new_password: newPassword,
+      },
     });
+    return await this._verifyResponse<ChangePasswordResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
-  async deleteUser(name: string) {
-    return await this._post("user/remove", { name: name });
-  }
-
-  async updateUser(name: string, password: string, isAdmin: boolean) {
-    return await this._post("user/update", {
-      name: name,
-      password: password,
-      is_admin: isAdmin,
+  async removeAccessory(accessoryID: string): Promise<RemoveAccessoryResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.DELETE("/api/accessory/{id}", {
+      params: {
+        path: {
+          id: accessoryID,
+        },
+      },
     });
+    return await this._verifyResponse<RemoveAccessoryResponse>(
+      data,
+      fetchError,
+      response,
+    );
+  }
+
+  async getUsers(): Promise<GetUsersResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.GET("/api/user/list", {});
+    return await this._verifyResponse<GetUsersResponse>(
+      data,
+      fetchError,
+      response,
+    );
+  }
+
+  async createUser(
+    name: string,
+    password: string,
+    permissions: components["schemas"]["Permissions"],
+  ): Promise<CreateUserResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/user/create", {
+      body: {
+        name: name,
+        password: password,
+        permissions: permissions,
+      },
+    });
+    return await this._verifyResponse<CreateUserResponse>(
+      data,
+      fetchError,
+      response,
+    );
+  }
+
+  async deleteUser(id: string): Promise<RemoveUserResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.DELETE("/api/user/{id}", {
+      params: {
+        path: {
+          id: id,
+        },
+      },
+    });
+    return await this._verifyResponse<RemoveUserResponse>(
+      data,
+      fetchError,
+      response,
+    );
+  }
+
+  async updateUser(
+    id: string,
+    name: string | null = null,
+    password: string | null = null,
+    permissions: components["schemas"]["Permissions"] | null = null,
+  ): Promise<UpdateUserResponse> {
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/user/{id}", {
+      params: {
+        path: {
+          id: id,
+        },
+      },
+      body: {
+        name: name,
+        password: password,
+        permissions: permissions,
+      },
+    });
+    return await this._verifyResponse<UpdateUserResponse>(
+      data,
+      fetchError,
+      response,
+    );
   }
 
   async exportGPX(
-    accessoryName: string,
+    accessoryID: string,
     startDate: Date,
     endDate: Date,
   ): Promise<FileData> {
-    let response = null;
-    for (let i = 0; i < 2; i++) {
-      response = await fetch(`${this.baseUrl}/export/gpx`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: accessoryName,
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await this.getToken()}`,
+    const {
+      data,
+      error: fetchError,
+      response,
+    } = await client.POST("/api/export/gpx/{accessory_id}", {
+      params: {
+        path: {
+          accessory_id: accessoryID,
         },
-      });
-      if (response.status == 401) {
-        await this.refreshToken();
-        continue;
-      }
-      break;
-    }
-    await this._verifyResponse(response);
-    const gpxData = await response?.arrayBuffer();
-    if (!gpxData) {
+      },
+      body: {
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+      },
+      parseAs: "blob",
+    });
+    const responseBlob = await this._verifyResponse<Blob>(
+      data,
+      fetchError,
+      response,
+    );
+
+    if (!responseBlob) {
       throw new FindMyWebError(
         "No GPX data provided",
         null,
-        "Server didn't return any text",
+        "Server didn't return any data",
       );
     }
-    let fileName = `${accessoryName}.gpx`;
-
+    let fileName = `${accessoryID}.gpx`;
     let contentDisposition = response?.headers.get("content-disposition");
     if (contentDisposition) {
       const match = contentDisposition.match(/filename="?(.+?)"?$/);
@@ -469,10 +624,6 @@ export default class FindMyWeb {
         fileName = decodeURIComponent(fileName);
       }
     }
-    let contentType = response?.headers.get("content-type");
-    if (!contentType) {
-      contentType = "application/octet-stream";
-    }
-    return new FileData(gpxData, fileName, contentType);
+    return new FileData(responseBlob, fileName);
   }
 }

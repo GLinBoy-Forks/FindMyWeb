@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, useTemplateRef } from "vue";
 
-import FindMyWeb, { Accessory, Location, BasicLocation, BatteryLevel } from "../lib/FindMyWeb.ts";
+import FindMyWeb, { type Accessory, type Location, type LocationInfo, BatteryLevel, LocationType } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -87,16 +87,21 @@ async function appleMaps(name: string, location: Location) {
   return `https://maps.apple.com/?ll=${location.lat},${location.lon}&q=${await urlsafeString(name)}`;
 }
 
-async function getHtmlForLocation(header: string, name: string, location: Location) {
-  return `<h1>
-    <b>${header}</b>
-    <i>(${await locationDateString(location)})</i>
-    <b>:</b>
-  </h1>
-  <p>(${location.lat} ${location.lon})</p>
-  <p>Battery: ${location.battery_level != null ? BatteryLevel[location.battery_level] : 'Not Found'}</p>
-  <p>Accuracy: ${location.horizontal_accuracy != null ? `${location.horizontal_accuracy}m` : 'Not Found'}</p>
-  <p>
+async function getHtmlForLocation(header: string, name: string, location: Location, locationInfo: LocationInfo) {
+  const html = [`<h1>
+      <b>${header}</b>
+      <i>(${await locationDateString(location)})</i>
+      <b>:</b>
+    </h1>
+    <p>(${location.lat} ${location.lon})</p>
+    <p>Type: ${location.type}</p>
+    <p>Battery: ${location.battery_level != null ? location.battery_level : 'Not Found'}</p>
+  `];
+  if (location.type == LocationType.FRUITYTAG && locationInfo) {
+    html.push(`<p>Accuracy: ${locationInfo.horizontal_accuracy != null ? `${locationInfo.horizontal_accuracy}m` : 'Not Found'}</p>`);
+  }
+
+  html.push(`<p>
     <u>
       <a href=${await geoUri(name, location)}>geo URI</a>
     </u>
@@ -110,7 +115,8 @@ async function getHtmlForLocation(header: string, name: string, location: Locati
     <u>
       <a target="_blank" href=${await appleMaps(name, location)}>Apple Maps</a>
     </u>
-  </p>`;
+  </p>`);
+  return html.join("\n");
 }
 
 
@@ -253,7 +259,7 @@ async function addLine(coordinates: number[][], color: string, name: string) {
 
 }
 
-async function addPreviousMarkers(locations: BasicLocation[], color: string, accessory_name: string, name: string) {
+async function addPreviousMarkers(locations: Location[], color: string, accessory_name: string, accessory_id: string, name: string) {
   if(!map) {
     return;
   }
@@ -285,7 +291,8 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
       properties: {
         'date': location_text,
         'location_id': location.id,
-        'accessory_name': accessory_name
+        'accessory_name': accessory_name,
+        'accessory_id': accessory_id
       },
       geometry: {
         type: "Point",
@@ -327,12 +334,12 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
       const coordinates = e.features[0].geometry.coordinates.slice();
       const locationId = e.features[0].properties.location_id;
       const accessoryName = e.features[0].properties.accessory_name;
+      const accessoryId = e.features[0].properties.accessory_id;
 
-      const location = (await FindMyWebAPI.getLocation(accessoryName, locationId)).location;
-      if (!location) {
-        return;
-      }
-      const description = await getHtmlForLocation("Previous", accessoryName, location);
+
+      const locationInfoResp = await FindMyWebAPI.getLocationInfo(accessoryId, locationId);
+
+      const description = await getHtmlForLocation("Previous", accessoryName, locationInfoResp.location, locationInfoResp.info);
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
@@ -348,7 +355,7 @@ async function addPreviousMarkers(locations: BasicLocation[], color: string, acc
   });
 }
 
-async function showMarker(accessory: Accessory, location: Location) {
+async function showMarker(accessory: Accessory, location: Location, locationInfo: LocationInfo) {
   if(!map || !accessory.icon || !accessory.color || !accessory.name || !location.lat || !location.lon) {
     return;
   }
@@ -365,7 +372,7 @@ async function showMarker(accessory: Accessory, location: Location) {
   element.onclick = async (event) => {
     event.stopPropagation();
     // @ts-ignore: Properties of Accessory are always defined
-    popups.push(new maplibregl.Popup({ offset: 25 }).setHTML(await getHtmlForLocation("Current", accessory.name, location)).setLngLat([location.lon, location.lat]).addTo(map));
+    popups.push(new maplibregl.Popup({ offset: 25 }).setHTML(await getHtmlForLocation("Current", accessory.name, location, locationInfo)).setLngLat([location.lon, location.lat]).addTo(map));
   };
 
   element.innerHTML = iconData.body;
@@ -378,14 +385,14 @@ async function showMarker(accessory: Accessory, location: Location) {
   markers.push(marker);
 }
 
-async function showTrace(accessory: Accessory, locations: BasicLocation[]) {
+async function showTrace(accessory: Accessory, locations: Location[]) {
   await clear();
 
-  if(!locations || locations.length == 0 || !accessory.color || !accessory.name || !map) {
+  if(!map || !locations) {
     return;
   }
 
-  let coordinates = [];
+  const coordinates = [];
 
   for (let i = 0; i < locations.length; i++) {
 
@@ -394,18 +401,15 @@ async function showTrace(accessory: Accessory, locations: BasicLocation[]) {
     coordinates.push([location.lon, location.lat]);
   }
 
-  const lastLocationId = locations.splice(0, 1)[0].id;
-  const lastLocation = (await FindMyWebAPI.getLocation(accessory.name, lastLocationId)).location;
-  if (!lastLocation) {
-    return;
-  }
+  const lastLocation = locations.splice(0, 1)[0];
+  const locationInfoResp = await FindMyWebAPI.getLocationInfo(accessory.id, lastLocation.id);
 
   // @ts-ignore: Typing geoJSON is a terrible idea
   await addLine(coordinates, accessory.color, 'trace');
 
-  await addPreviousMarkers(locations, accessory.color, accessory.name, 'points');
+  await addPreviousMarkers(locations, accessory.color, accessory.name, accessory.id, 'points');
 
-  await showMarker(accessory, lastLocation);
+  await showMarker(accessory, locationInfoResp.location, locationInfoResp.info);
 
   // @ts-ignore: Typing geoJSON is a terrible idea
   await zoomToCoordinates(coordinates);

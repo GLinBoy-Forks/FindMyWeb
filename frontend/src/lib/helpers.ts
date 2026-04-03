@@ -1,4 +1,4 @@
-import { Location } from "./FindMyWeb";
+import { type Location } from "./FindMyWeb.ts";
 
 const dateTimeFormatter = new Intl.DateTimeFormat([], {
   day: "numeric",
@@ -8,6 +8,9 @@ const dateTimeFormatter = new Intl.DateTimeFormat([], {
   minute: "numeric",
   second: "numeric",
 });
+
+const base64regex =
+  /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
 export async function locationDate(location: Location): Promise<Date | null> {
   if (!location.timestamp) {
@@ -23,4 +26,8 @@ export async function locationDateString(location: Location): Promise<string> {
     return "No timestamp";
   }
   return dateTimeFormatter.format(date);
+}
+
+export async function isBase64(str: string) {
+  return str.match(base64regex);
 }

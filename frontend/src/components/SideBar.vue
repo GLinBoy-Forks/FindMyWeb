@@ -12,7 +12,7 @@ const SidebarEntry = defineAsyncComponent({
     timeout: 3000,
 });
 
-import FindMyWeb, { Accessory } from "../lib/FindMyWeb.ts";
+import FindMyWeb, { type Accessory, BatteryLevel } from "../lib/FindMyWeb.ts";
 import { locationDateString } from "../lib/helpers.ts";
 
 const emit = defineEmits(["selected", "newAccessory", "configure"]);
@@ -44,20 +44,24 @@ async function updateTags(allTags: Accessory[]) {
         if (!tag.name) {
             continue;
         }
-
-        const locationResp = await FindMyWebAPI.getLocation(tag.name);
         let lastSeenStr = "Never";
-        if (locationResp.location) {
-            lastSeenStr = await locationDateString(locationResp.location);
-        }
+        let locationResp = null;
+        try {
+            locationResp = await FindMyWebAPI.getLastLocation(tag.id);
+            lastSeenStr = await locationDateString(locationResp);
+        } catch {}
+
         // @ts-ignore: Dynamic indexing
         newTags.push({
             name: tag.name,
+            id: tag.id,
             icon: tag.icon,
             color: tag.color,
             lastSeen: lastSeenStr,
-            active: true ? locationResp.location : false,
-            batteryLevel: locationResp.location?.battery_level,
+            active: true ? locationResp : false,
+            batteryLevel: locationResp
+                ? locationResp.battery_level
+                : BatteryLevel.Unknown.value,
         });
     }
     tags.value = newTags;
@@ -75,7 +79,7 @@ async function onSelect(tag: any, index: number) {
 
         newSelected.toggle(true);
         toggled = index;
-        emit("selected", tag.name);
+        emit("selected", tag.id);
     } else {
         newSelected.toggle(false);
         toggled = null;
@@ -83,7 +87,7 @@ async function onSelect(tag: any, index: number) {
     }
 }
 
-async function onConfigure(key: string) {
+async function onConfigure(id: string) {
     if (toggled != null) {
         if (!sidebarEntries.value) {
             return;
@@ -92,7 +96,7 @@ async function onConfigure(key: string) {
         toggled = null;
         emit("selected", null);
     }
-    emit("configure", key);
+    emit("configure", id);
 }
 
 defineExpose({ updateSidebar, updateTags });
@@ -115,8 +119,9 @@ defineExpose({ updateSidebar, updateTags });
                     ref="sidebarEntries"
                     v-for="(tag, index) in tags"
                     @click="tag.active ? onSelect(tag, index) : null"
-                    @configure="onConfigure(tag.name)"
+                    @configure="onConfigure(tag.id)"
                     :name="tag.name"
+                    :id="tag.id"
                     :icon="tag.icon"
                     :color="tag.color"
                     :last-seen="tag.lastSeen"

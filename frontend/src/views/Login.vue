@@ -67,7 +67,7 @@ async function login() {
 
                         <div class="col-span-1">
                             <div
-                                class="relative mt-1 w-full h-10 rounded-full text-m text-gray-300 border-gray-200 hover:bg-blue-700 bg-blue-600 shadow-sm p-2"
+                                class="cursor-pointer relative mt-1 w-full h-10 rounded-full text-m text-gray-300 border-gray-200 hover:bg-blue-700 bg-blue-600 shadow-sm p-2"
                             >
                                 <input
                                     type="submit"

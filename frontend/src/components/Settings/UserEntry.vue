@@ -1,11 +1,12 @@
 <script setup lang="ts">
-const props = defineProps(["name", "superuser", "admin"]);
+import { Permissions, hasPermission } from "../../lib/FindMyWeb.ts";
+const props = defineProps(["name", "superuser", "permissions"]);
 const emit = defineEmits(["configure"]);
 
 function get_user_type_name(): string {
     if (props.superuser) {
         return "Superuser";
-    } else if (props.admin) {
+    } else if (hasPermission(props.permissions, Permissions.ADMIN)) {
         return "Admin";
     } else {
         return "User";

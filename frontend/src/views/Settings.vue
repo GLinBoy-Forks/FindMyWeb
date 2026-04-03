@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
 
 import SettingsEntry from "../components/Settings/SettingsEntry.vue";
-import FindMyWeb from "../lib/FindMyWeb";
+import FindMyWeb, { Permissions } from "../lib/FindMyWeb";
 
 const FindMyWebAPI = new FindMyWeb();
 
@@ -25,7 +25,7 @@ async function onToggle(route_name: string) {
 }
 
 async function init() {
-    if (await FindMyWebAPI.isAdmin()) {
+    if (await FindMyWebAPI.userHasPermission(Permissions.ADMIN)) {
         // @ts-ignore: Needed to add `settings-admin` dynamically
         settingsOptions.value["settings-admin"] = {
             icon: "mdi:administrator",

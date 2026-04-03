@@ -2,15 +2,14 @@
 import { onMounted, ref } from "vue";
 import { Icon } from "@iconify/vue";
 import UserEntry from "./UserEntry.vue";
-import FindMyWeb, { UserInfo } from "../../lib/FindMyWeb";
+import FindMyWeb, { type UserInfo, Permissions } from "../../lib/FindMyWeb";
 import UserConfig from "../../views/UserConfig.vue";
 
 const FindMyWebAPI = new FindMyWeb();
 
 const users = ref<Array<UserInfo>>([]);
 const showOverlay = ref<boolean>(false);
-// @ts-ignore: can also be null
-const overlayUser = ref<InstanceType<UserInfo>>(null);
+const overlayUser = ref<InstanceType<UserInfo> | null>(null);
 
 async function loadUsers() {
     const fetchedUsers = (await FindMyWebAPI.getUsers()).users;
@@ -58,7 +57,10 @@ onMounted(async () => {
     >
         <UserConfig
             :username="overlayUser ? overlayUser.name : null"
-            :is-admin="overlayUser ? overlayUser.is_admin : null"
+            :permissions="
+                overlayUser ? overlayUser.permissions : Permissions.USER
+            "
+            :userid="overlayUser ? overlayUser.id : null"
             @cancel="onSaveCancel"
             @save="onSaveCancel"
         />
@@ -72,7 +74,7 @@ onMounted(async () => {
                     v-for="(user, index) in users"
                     :name="user.name"
                     :superuser="user.superuser"
-                    :admin="user.is_admin"
+                    :permissions="user.permissions"
                     :key="index"
                 />
                 <button

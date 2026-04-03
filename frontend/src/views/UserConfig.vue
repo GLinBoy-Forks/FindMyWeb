@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue';
-import FindMyWeb from '../lib/FindMyWeb';
+import FindMyWeb, { Permissions, hasPermission } from '../lib/FindMyWeb';
 import 'iconify-icon-picker/style.css'
 
 const FindMyWebAPI = new FindMyWeb();
@@ -15,7 +15,7 @@ const isSelf = ref(false);
 
 const entryError = ref("");
 
-const props = defineProps(["username", "isAdmin"]);
+const props = defineProps(["userid", "username", "permissions"]);
 
 async function save() {
   let error = false;
@@ -28,7 +28,7 @@ async function save() {
   } else if(username.value.length > 32) {
     entryError.value = "Username is to long. Max length: 32";
     error = true;
-  } else if(password.value.length <= 0 && !props.username) {
+  } else if(password.value.length <= 0 && !props.userid) {
     entryError.value = "Password is empty";
     error = true;
   }
@@ -36,11 +36,18 @@ async function save() {
   if(error) {
     return;
   }
+
+  let permissions = props.permissions;
+  if (isAdmin.value) {
+    permissions |= Permissions.ADMIN;
+  } else {
+    permissions &= ~Permissions.ADMIN;
+  }
   try {
-    if (props.username) {
-      await FindMyWebAPI.updateUser(username.value, password.value, isAdmin.value);
+    if (props.userid) {
+      await FindMyWebAPI.updateUser(props.userid, username.value, password.value.length > 0 ? password.value: null, permissions);
     } else {
-      await FindMyWebAPI.createUser(username.value, password.value, isAdmin.value);
+      await FindMyWebAPI.createUser(username.value, password.value, permissions);
     }
   } catch(error: any) {
     entryError.value = `${error.name}: ${error.detail()}`
@@ -62,7 +69,7 @@ async function deleteUser() {
 async function init() {
   if(props.username) {
     username.value = props.username;
-    isAdmin.value = props.isAdmin;
+    isAdmin.value = hasPermission(props.permissions, Permissions.ADMIN);
     if(props.username == await FindMyWebAPI.getUsername()) {
       isSelf.value = true;
 
