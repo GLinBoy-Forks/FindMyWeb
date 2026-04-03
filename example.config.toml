@@ -21,6 +21,12 @@ uri = "sqlite://REPLACE WITH DB PATH"
 [frontend]
 path = "REPLACE WITH DIST FOLDER PATH FROM FRONTEND"
 
+# Advanced config options
+
+# If you want to change how fastapi compresses responses
+# [compression]
+# enabled = True
+# minimum_size = 10000
 
 # If cors is needed
 # [cors]
@@ -28,6 +34,7 @@ path = "REPLACE WITH DIST FOLDER PATH FROM FRONTEND"
 # cors_origins = ["*"]
 # cors_headers = ["*"]
 # cors_methods = ["*"]
+# expose_headers = ["Content-Disposition"]
 
 # If you want to debug something
 # [log]
