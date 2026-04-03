@@ -12,7 +12,7 @@ class LocationsResponse(BaseModel):
 
 class LocationResponse(BaseModel):
     location: Location
-    info: Union[LocationInfo, FruityTagLocationInfo, None] = None
+    info: Union[FruityTagLocationInfo, None] = None
 
 
 class LocationsRequest(AccessoryBaseRequest):

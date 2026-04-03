@@ -6,10 +6,8 @@ from fastapi import APIRouter, Depends
 from app.database import db
 from app.database.models import Location, User
 from app.dependencies import get_current_active_user
-from app.helpers import (ACCESSORY_NOT_FOUND_EXCEPTION,
-                         LOCATION_NOT_FOUND_EXCEPTION)
-from app.models.location import (LocationResponse, LocationsRequest,
-                                 LocationsResponse)
+from app.helpers import ACCESSORY_NOT_FOUND_EXCEPTION, LOCATION_NOT_FOUND_EXCEPTION
+from app.models.location import LocationResponse, LocationsRequest, LocationsResponse
 
 location = APIRouter()
 
@@ -44,7 +42,7 @@ async def get_location_info(
         )
         if location:
             info = await db.get_location_info(accessory=accessory, location=location)
-            return LocationResponse(location=location, info=info)
+            return LocationResponse(location=location, info=info)  # pyright: ignore[reportArgumentType]
         else:
             raise LOCATION_NOT_FOUND_EXCEPTION
     raise ACCESSORY_NOT_FOUND_EXCEPTION
