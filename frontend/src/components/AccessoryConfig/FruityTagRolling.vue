@@ -15,8 +15,8 @@ const props = defineProps(["isNew", "info"]);
 const masterKey = ref((props.info && props.info.master_key) ? props.info.master_key : "");
 const seriesKey = ref((props.info && props.info.series_key) ? props.info.series_key : "");
 const secondaryKey = ref((props.info && props.info.secondary_key) ? props.info.secondary_key : "");
-const pairedAt = ref((props.info && props.info.paired_at) ? props.info.paired_at : new Date());
-const alignmentDate = ref((props.info) ? props.info.alignment_date : null);
+const pairedAt = ref((props.info && props.info.paired_at) ? new Date(props.info.paired_at+"Z") : new Date());
+const alignmentDate = ref((props.info && props.info.alignment_date) ? new Date(props.info.alignment_date+"Z") : null);
 const alignmentIndex = ref((props.info) ? props.info.alignment_index : null);
 
 const errorInject = inject("entryError");
