@@ -61,3 +61,72 @@ export function hexToBase64(str: string) {
   }
   return btoa(bytes);
 }
+
+export function plistToJson(plist: Element): any {
+  switch (plist.nodeName) {
+    case "plist":
+      if (plist.children.length != 1)
+        throw new Error("Invalid plist: <plist> has multiple children");
+      return plistToJson(plist.children[0]);
+    case "dict":
+      var result = new Map();
+      for (let i = 0; i < plist.children.length; i += 2) {
+        const key = plist.children[i];
+        if (key.nodeName != "key" || key.children.length != 0)
+          throw new Error(`Invalid plist: <dict> has invalid key node: ${key}`);
+
+        const value = plistToJson(plist.children[i + 1]);
+        result.set(key.textContent, value);
+      }
+      return result;
+    case "array":
+      return Array.from(plist.children).map((child) => plistToJson(child));
+  }
+
+  if (plist.children.length != 0)
+    throw new Error(
+      `Invalid plist: <${plist.nodeName}> node shouldn't contain children: ${plist}`,
+    );
+
+  switch (plist.nodeName) {
+    case "date":
+      return new Date(plist.textContent);
+    case "integer":
+      return parseInt(plist.textContent);
+    case "string":
+      return plist.textContent;
+    case "data":
+      return plist.textContent
+        .replaceAll("\t", "")
+        .replaceAll("\n", "")
+        .replaceAll(" ", "");
+    case "false":
+      return false;
+    case "true":
+      return true;
+    default:
+      throw new Error("Invalid plist: Unrecognized node: " + plist.nodeName);
+  }
+}
+
+export function readXMLFile(file: File) {
+  const reader = new FileReader();
+  const parser = new DOMParser();
+
+  reader.readAsText(file);
+
+  return new Promise((resolve, reject) => {
+    reader.onload = () => {
+      if (!reader.result || reader.result instanceof ArrayBuffer)
+        throw new Error("Reading file failed");
+      const xml = parser.parseFromString(reader.result, "application/xml");
+
+      if (xml.documentElement.nodeName == "parsererror") {
+        reject(xml.documentElement.textContent);
+      }
+
+      resolve(xml);
+    };
+    reader.onerror = () => reject("Error reading file");
+  });
+}

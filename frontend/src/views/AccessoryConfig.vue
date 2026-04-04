@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUpdated, onMounted, useTemplateRef } from 'vue'
+import { ref, onUpdated, onMounted, useTemplateRef, provide } from 'vue'
 import { Icon } from '@iconify/vue';
 import FindMyWeb, { AccessoryType, FindMyWebError } from '../lib/FindMyWeb';
 import ConfigEntry from "../components/AccessoryConfig/ConfigEntry.vue";
@@ -20,6 +20,8 @@ const showIconSelector = ref(false);
 const accessoryName = ref("");
 
 const entryError = ref("");
+provide('entryError', entryError)
+
 const accessoryID = ref(null);
 const accessoryInfo = ref(null);
 const accessoryType = ref(null);
@@ -156,10 +158,10 @@ onMounted(async () => { await update(); });
 
             <DeviceOptions ref="deviceOptions" :accessoryInfo="accessoryInfo" :accessoryType="accessoryType" :isNewAccessory="isNewAccessory" />
 
-            <button class="mr-auto mt-6 cursor-pointer" @click="emit('cancel')">
+            <button class="mr-auto mt-2 cursor-pointer" @click="emit('cancel')">
                 <p class="text-2xl text-white font-bold bg-gray-500 hover:bg-gray-700 rounded-lg px-2 py-2 shadow-md shadow-gray-900">Cancel</p>
             </button>
-            <div class="text-white relative shadow-md shadow-gray-900 ml-auto mt-6">
+            <div class="text-white relative shadow-md shadow-gray-900 ml-auto mt-2">
                 <Icon
                     v-if="isLoading"
                     class="absolute size-full top-0 left-0"
