@@ -7,10 +7,10 @@ A project which allows you to build trackers which you actually own. The idea is
 - [ ] Samsung SmartThings
 
 ## Why
-Currently there are a lot of different networks for location trackers from a plethora of different vendors. This causes a lot of fragmantation and everyone requires you to own a device where their closed-source software runs without you knowing what actually happens with your location. The idea is to create a web interaface for all of them and allow you to build your own open-source trackers.
+Currently there are a lot of different networks for location trackers from a plethora of different vendors. This causes a lot of fragmantation and everyone requires you to own a device where their closed-source software runs without you knowing what actually happens with your location. The idea is to create a web interface for all of them and allow you to build your own open-source trackers.
 
 ## How
-The backend currently uses malmeloss FindMy.py library to interact with Apples network while the trackers run a custom Zephyr based firmware. You can find out more info in the setup instructions.
+The backend currently uses malmeloo's [FindMy.py](https://github.com/malmeloo/FindMy.py) library to interact with Apple's network while the trackers run a custom Zephyr based firmware. You can find out more info in the setup instructions.
 
 # Setup
 ## Web (Frontend+Backend)
